@@ -1512,6 +1512,7 @@ var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYm
 var supabase = null; // Supabase clientは認証後に初期化
 
 var MOCK_MODE = false; // Supabase統合版は本番モード // テストモード：trueでダミーデータ、falseで本番API
+var GEMINI_API_KEY = 'AIzaSyCSydp3wq3bD7ybAfOJljBHTk5W-8SFgQs';
 
 var MOCK_DATA = {
   comp: `【競合5社リスト】
@@ -1657,30 +1658,31 @@ async function callAI(prompt, el, cb){
     return;
   }
   try{
-    // Supabase Edge Function経由でGemini APIを呼び出し（APIキー秘匿）
-    var session = supabase.auth.session ? supabase.auth.session() : (await supabase.auth.getSession()).data.session;
-    var token = session ? session.access_token : '';
-    var res = await fetch(SUPABASE_URL+'/functions/v1/gemini-proxy', {
+    // Gemini API直接呼び出し
+    var res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key='+GEMINI_API_KEY, {
       method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'Authorization':'Bearer '+token
-      },
-      body: JSON.stringify({ prompt: prompt })
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        contents:[{parts:[{text: prompt}]}],
+        generationConfig:{maxOutputTokens:4000, temperature:0.7}
+      })
     });
     var data = await res.json();
     if(!res.ok || data.error){
-      el.innerHTML='<div class="alert alert-red"><span class="alert-icon">⚠</span>エラー: '+(data.error||res.status)+'</div>';
+      el.innerHTML='<div class="alert alert-red"><span class="alert-icon">⚠</span>Gemini APIエラー: '+(data.error?.message||res.status)+'</div>';
       return;
     }
-    var txt = data.text || '';
+    var txt = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    if(!txt){
+      el.innerHTML='<div class="alert alert-red"><span class="alert-icon">⚠</span>AIからの応答が空でした。もう一度お試しください。</div>';
+      return;
+    }
     if(cb){
       cb(txt);
-      // Supabaseにレスポンスを自動保存
       saveAIResponseToDB(prompt, txt);
     }
   } catch(e){
-    el.innerHTML='<div class="alert alert-red"><span class="alert-icon">⚠</span>通信エラーが発生しました: '+e.message+'</div>';
+    el.innerHTML='<div class="alert alert-red"><span class="alert-icon">⚠</span>通信エラー: '+e.message+'</div>';
   }
 }
 
