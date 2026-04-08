@@ -1550,6 +1550,77 @@ var MOCK_DATA = {
 メインビジュアル: 緊急性を演出するボタン。申し込みの簡単さを示すステップ図（3ステップ）。`
 };
 
+
+// =========== HELPER FUNCTIONS ===========
+function getDataInsightBanner(){
+  var good = (DB.adResults||[]).filter(function(r){return r.perf==='good';}).length;
+  var audit = (DB.auditData.medical||[]).length + (DB.auditData.media||[]).length + (DB.auditData.clinic||[]).length;
+  if(!good && !audit) return '';
+  var parts = [];
+  if(good) parts.push('<strong>'+good+'件</strong>の好調CR');
+  if(audit) parts.push('<strong>'+audit+'件</strong>の審査基準');
+  return '<div class="data-insight-banner"><span class="dib-icon">📊</span><div class="dib-text">蓄積データ: '+parts.join('・')+'をAI分析に反映します</div></div>';
+}
+
+function buildResultContext(){
+  var good = (DB.adResults||[]).filter(function(r){return r.perf==='good';});
+  if(!good.length) return '';
+  var ctx = '
+
+【過去の好調CRデータ（参考）】
+';
+  good.slice(0,3).forEach(function(r,i){
+    ctx += (i+1)+'. 媒体:'+r.mediaLabel;
+    if(r.cpa) ctx += ' CPA:¥'+Number(r.cpa).toLocaleString();
+    if(r.appeal) ctx += '
+   訴求:'+r.appeal.substring(0,60);
+    ctx += '
+';
+  });
+  return ctx;
+}
+
+function buildAuditContext(){
+  var all = [].concat(DB.auditData.medical||[], DB.auditData.media||[], DB.auditData.clinic||[]);
+  if(!all.length) return '';
+  var ctx = '
+
+【審査基準（蓄積データ）】
+';
+  all.slice(0,5).forEach(function(d){
+    ctx += '・'+d.content.substring(0,80)+'
+';
+  });
+  return ctx;
+}
+
+function selectMedia(id){
+  resultFormState.media = id;
+  // Save current field values
+  var mDefs = {meta:['headline','maintext','adcopy'],tiktok:['maintext','adcopy'],line:['title','desc','adcopy'],youtube:['title','desc','adcopy']};
+  var savedFields = {};
+  (mDefs[resultFormState.media]||[]).forEach(function(f){var el=document.getElementById('rf-'+f);if(el)savedFields[f]=el.value;});
+  resultFormState.savedFields = savedFields;
+  resultFormState.savedAppeal = (document.getElementById('rf-appeal')||{}).value||'';
+  resultFormState.savedNote = (document.getElementById('rf-note')||{}).value||'';
+  resultFormState.savedCV = (document.getElementById('rf-cv')||{}).value||'';
+  resultFormState.savedCPA = (document.getElementById('rf-cpa')||{}).value||'';
+  resultFormState.savedAPO = (document.getElementById('rf-apo')||{}).value||'';
+  var body = document.getElementById('result-form-body');
+  if(body) body.innerHTML = renderResultFormHTML();
+}
+
+function selectPerf(perf){
+  resultFormState.perf = perf;
+  var body = document.getElementById('result-form-body');
+  if(body) body.innerHTML = renderResultFormHTML();
+}
+
+function updateUploadLabel(input){
+  var lbl = document.getElementById('rf-file-label');
+  if(lbl && input.files[0]) lbl.textContent = '📎 '+input.files[0].name;
+}
+
 async function saveAIResponseToDB(prompt, response){
   try{if(!supabase||!currentUser)return;await supabase.from('lp_data').insert({project_name:lpFD.name||'未設定',input_text:prompt.substring(0,2000),ai_response:response.substring(0,5000),created_by:currentUser.id});}catch(e){console.warn('DB save:',e);}
 }
@@ -3679,6 +3750,53 @@ function closeProjFolderInner(){var el=document.getElementById('proj-folder-inne
 function openPicker(id){document.getElementById(id).classList.add('open');document.body.style.overflow='hidden';}
 function closePicker(id){document.getElementById(id).classList.remove('open');document.body.style.overflow='';}
 function closePickerOut(e,id){if(e.target===document.getElementById(id))closePicker(id);}
+
+
+// =========== 共有履歴 ===========
+async function loadSharedHistory(){
+  try{
+    if(!supabase) return;
+    const{data,error}=await supabase.from('lp_data').select('*').order('created_at',{ascending:false}).limit(50);
+    if(error)throw error;
+    window.sharedHistory=data||[];
+    renderSharedHistory();
+  }catch(e){console.warn('History load error:',e);}
+}
+
+function renderSharedHistory(){
+  var area=document.getElementById('shared-history-list');
+  if(!area)return;
+  var data=window.sharedHistory||[];
+  if(!data.length){area.innerHTML='<p style="color:var(--text3);font-size:13px;text-align:center;padding:24px">まだ履歴がありません</p>';return;}
+  area.innerHTML=data.map(function(item){
+    var date=item.created_at?new Date(item.created_at).toLocaleDateString('ja-JP',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}):'';
+    var preview=(item.ai_response||'').substring(0,100).replace(/
+/g,' ');
+    return '<div class="result-card-item" data-hid="'+item.id+'" onclick="openHistoryDetailEl(this)">'
+      +'<div class="result-card-header">'
+      +'<span class="result-perf-badge rpb-good">'+(item.project_name||'不明')+'</span>'
+      +'<span style="font-size:11px;color:var(--text3);margin-left:auto">'+date+'</span>'
+      +'</div>'
+      +'<div class="result-card-title" style="font-size:13px;color:var(--text2)">'+preview+'…</div>'
+      +'</div>';
+  }).join('');
+}
+
+function openHistoryDetail(id){
+  var item=(window.sharedHistory||[]).find(function(h){return h.id===id;});
+  if(!item)return;
+  var modal=document.getElementById('history-detail-modal');
+  if(!modal)return;
+  document.getElementById('history-detail-project').textContent=item.project_name||'不明';
+  document.getElementById('history-detail-date').textContent=item.created_at?new Date(item.created_at).toLocaleString('ja-JP'):'';
+  document.getElementById('history-detail-input').textContent=(item.input_text||'').substring(0,300);
+  document.getElementById('history-detail-response').textContent=item.ai_response||'';
+  modal.style.display='flex';
+}
+
+function openHistoryDetailEl(el){
+  openHistoryDetail(el.getAttribute('data-hid'));
+}
 
 // =========== AUTH ===========
 async function initSupabase(){
