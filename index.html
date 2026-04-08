@@ -6,27 +6,7 @@
 <title>LP Studio — LP制作プラットフォーム</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<!-- Supabase JS SDK v2 -->
-<script>
-// Supabase SDK loader with fallback
-(function(){
-  var urls = [
-    'https://unpkg.com/@supabase/supabase-js@2.39.3/dist/umd/supabase.js',
-    'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js',
-    'https://cdnjs.cloudflare.com/ajax/libs/supabase/2.39.3/supabase.min.js'
-  ];
-  function loadScript(i){
-    if(i>=urls.length) return;
-    var s=document.createElement('script');
-    s.src=urls[i];
-    s.onerror=function(){ loadScript(i+1); };
-    document.head.appendChild(s);
-  }
-  loadScript(0);
-})();
-</script>
 <style>
-
 :root {
   --bg: #0a0a0f;
   --bg2: #111118;
@@ -647,41 +627,27 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
 .cv-checkbox{display:flex;align-items:center;gap:6px;padding:6px 12px;border:1px solid var(--border2);border-radius:99px;cursor:pointer;font-size:12px;color:var(--text2);transition:all .15s;user-select:none}
 .cv-checkbox.checked{border-color:#52c8e0;background:rgba(52,176,208,0.1);color:#52c8e0}
 .cv-checkbox input{display:none}
-
-/* ---- LOGIN SCREEN OVERRIDE ---- */
-html,body{height:100%;overflow:hidden}
-#app-wrapper{display:flex;}
 </style>
 </head>
 <body>
-
-<!-- ===== LOGIN OVERLAY ===== -->
-<div id="login-overlay" style="position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px">
+<!-- LOGIN OVERLAY -->
+<div id="login-overlay" style="position:fixed;inset:0;background:#0a0a0f;display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px">
   <div style="width:100%;max-width:400px">
     <div style="text-align:center;margin-bottom:32px">
-      <div style="width:52px;height:52px;background:linear-gradient(135deg,var(--accent),var(--teal));border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 16px">◈</div>
-      <div style="font-size:22px;font-weight:600;letter-spacing:-0.03em;margin-bottom:6px">LP Studio</div>
-      <div style="font-size:13px;color:var(--text2)">チームアカウントでログインしてください</div>
+      <div style="width:52px;height:52px;background:linear-gradient(135deg,#7b6ff0,#34d0b0);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 16px">◈</div>
+      <div style="font-size:22px;font-weight:600;color:#f0f0f5;margin-bottom:6px">LP Studio</div>
+      <div style="font-size:13px;color:#9898b0">チームアカウントでログインしてください</div>
     </div>
-    <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);padding:28px">
-      <div style="margin-bottom:14px">
-        <label style="display:block;font-size:12px;color:var(--text2);margin-bottom:5px">メールアドレス</label>
-        <input id="login-email" type="email" class="form-input" placeholder="your@email.com" autocomplete="email">
-      </div>
-      <div style="margin-bottom:20px">
-        <label style="display:block;font-size:12px;color:var(--text2);margin-bottom:5px">パスワード</label>
-        <input id="login-password" type="password" class="form-input" placeholder="••••••••" autocomplete="current-password">
-      </div>
-      <div id="login-error" style="font-size:12px;color:var(--red);margin-bottom:12px;min-height:16px"></div>
-      <button id="login-btn" class="btn btn-primary" style="width:100%;padding:12px;font-size:14px" onclick="handleLogin()">ログイン</button>
+    <div style="background:#111118;border:1px solid rgba(255,255,255,0.12);border-radius:12px;padding:28px">
+      <div style="margin-bottom:14px"><label style="display:block;font-size:12px;color:#9898b0;margin-bottom:5px">メールアドレス</label><input id="login-email" type="email" class="form-input" placeholder="your@email.com"></div>
+      <div style="margin-bottom:20px"><label style="display:block;font-size:12px;color:#9898b0;margin-bottom:5px">パスワード</label><input id="login-password" type="password" class="form-input" placeholder="••••••••"></div>
+      <div id="login-error" style="font-size:12px;color:#f05252;margin-bottom:12px;min-height:16px"></div>
+      <button class="btn btn-primary" style="width:100%;padding:12px;font-size:14px" onclick="handleLogin()">ログイン</button>
     </div>
-    <div style="text-align:center;margin-top:16px;font-size:12px;color:var(--text3)">このツールへのアクセスはSupabaseで管理されています</div>
+    <div style="text-align:center;margin-top:16px;font-size:12px;color:#5a5a72">このツールへのアクセスはSupabaseで管理されています</div>
   </div>
 </div>
-
-<!-- ===== APP WRAPPER ===== -->
 <div id="app-wrapper" style="display:none;width:100%;height:100vh">
-
 <div class="app">
 
 <!-- ===== SIDEBAR ===== -->
@@ -736,17 +702,8 @@ html,body{height:100%;overflow:hidden}
       </button>
     </div>
   </div>
-  <div class="sidebar-footer-history" style="padding:0 10px 8px">
-      <button class="nav-item" onclick="loadSharedHistory();navTo('shared-history',this)" style="width:100%">
-        <span class="nav-dot"></span>共有履歴
-      </button>
-    </div>
-    <div class="sidebar-footer">
-    <div style="display:flex;align-items:center;gap:8px;padding:0 10px">
-      <div id="user-badge" style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--teal));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#fff;flex-shrink:0">?</div>
-      <div style="flex:1;min-width:0"><div id="user-email" style="font-size:11px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></div></div>
-      <button onclick="handleLogout()" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:12px;padding:4px" title="ログアウト">⏻</button>
-    </div>
+  <div class="sidebar-footer">
+    <div class="version-tag">v1.0.0 — LP Studio</div>
   </div>
 </div>
 
@@ -1081,66 +1038,9 @@ html,body{height:100%;overflow:hidden}
   </div>
   <div class="page-body" id="anken-detail-body"></div>
 </div>
-
-<!-- 共有履歴 -->
-<div class="screen" id="s-shared-history">
-  <div class="page-header">
-    <div class="page-header-row">
-      <div><div class="page-title">共有履歴</div><div class="page-sub">チーム全員のAI生成履歴を閲覧できます</div></div>
-      <button class="btn btn-ghost btn-sm" onclick="loadSharedHistory()">↻ 更新</button>
-    </div>
-  </div>
-  <div class="page-body"><div id="shared-history-list"></div></div>
-</div>
 </div><!-- /main -->
 <div id="audit-warning-bar" class="audit-warning-bar"></div>
 </div><!-- /app -->
-<!-- 共有履歴モーダル -->
-<div id="history-detail-modal" style="position:fixed;inset:0;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center;z-index:9998;padding:20px;backdrop-filter:blur(4px)">
-  <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);padding:24px;width:100%;max-width:560px;max-height:80vh;overflow-y:auto">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-      <div>
-        <div style="font-size:16px;font-weight:600" id="history-detail-project"></div>
-        <div style="font-size:11px;color:var(--text3);margin-top:2px" id="history-detail-date"></div>
-      </div>
-      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('history-detail-modal').style.display='none'">✕ 閉じる</button>
-    </div>
-    <div style="margin-bottom:12px">
-      <div style="font-size:11px;font-weight:500;color:var(--text3);font-family:DM Mono,monospace;margin-bottom:6px">INPUT</div>
-      <div id="history-detail-input" style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius2);padding:10px 13px;font-size:12px;color:var(--text2);line-height:1.6;max-height:120px;overflow-y:auto"></div>
-    </div>
-    <div>
-      <div style="font-size:11px;font-weight:500;color:var(--text3);font-family:DM Mono,monospace;margin-bottom:6px">AI RESPONSE</div>
-      <div id="history-detail-response" style="background:var(--bg3);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius2);padding:12px 14px;font-size:12px;color:var(--text2);line-height:1.8;white-space:pre-wrap;max-height:300px;overflow-y:auto"></div>
-    </div>
-  </div>
-</div>
-
-
-<!-- パスワード設定画面 -->
-<div id="recovery-overlay" style="position:fixed;inset:0;background:var(--bg);display:none;align-items:center;justify-content:center;z-index:10000;padding:20px">
-  <div style="width:100%;max-width:400px">
-    <div style="text-align:center;margin-bottom:32px">
-      <div style="width:52px;height:52px;background:linear-gradient(135deg,var(--accent),var(--teal));border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 16px">🔑</div>
-      <div style="font-size:22px;font-weight:600;letter-spacing:-0.03em;margin-bottom:6px">パスワードを設定</div>
-      <div style="font-size:13px;color:var(--text2)">新しいパスワードを入力してください</div>
-    </div>
-    <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);padding:28px">
-      <div style="margin-bottom:14px">
-        <label style="display:block;font-size:12px;color:var(--text2);margin-bottom:5px">新しいパスワード</label>
-        <input id="new-password" type="password" class="form-input" placeholder="8文字以上">
-      </div>
-      <div style="margin-bottom:20px">
-        <label style="display:block;font-size:12px;color:var(--text2);margin-bottom:5px">パスワード（確認）</label>
-        <input id="new-password-confirm" type="password" class="form-input" placeholder="もう一度入力">
-      </div>
-      <div id="recovery-error" style="font-size:12px;color:var(--red);margin-bottom:12px;min-height:16px"></div>
-      <button id="recovery-btn" class="btn btn-primary" style="width:100%;padding:12px;font-size:14px" onclick="handlePasswordUpdate()">パスワードを設定する</button>
-    </div>
-  </div>
-</div>
-</div><!-- /app-wrapper -->
-
 
 <!-- LP PICKER MODAL -->
 <div class="picker-overlay" id="lp-picker" onclick="closePickerOut(event,'lp-picker')">
@@ -1245,8 +1145,21 @@ html,body{height:100%;overflow:hidden}
   </div>
 </div>
 
-
 <script>
+(function(){
+  var urls=['https://unpkg.com/@supabase/supabase-js@2.39.3/dist/umd/supabase.js','https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js'];
+  function load(i){if(i>=urls.length)return;var s=document.createElement('script');s.src=urls[i];s.onerror=function(){load(i+1);};document.head.appendChild(s);}
+  load(0);
+})();
+</script>
+<script>
+// =========== SUPABASE CONFIG ===========
+var SUPABASE_URL = 'https://zboxiyrinucvjwuicsso.supabase.co';
+var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpib3hpeXJpbnVjdmp3dWljc3NvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5MTcyNDIsImV4cCI6MjA5MDQ5MzI0Mn0.DrE6y32aKNug4WQ-ppPMeHRDFNCRzUEUuPkyd5Y02JU';
+var GEMINI_API_KEY = 'AIzaSyCSydp3wq3bD7ybAfOJljBHTk5W-8SFgQs';
+var MOCK_MODE = false;
+var supabase = null;
+var currentUser = null;
 
 // =========== STATE ===========
 var DB = {
@@ -1505,14 +1418,7 @@ function lpContext(){
   return lines.join('\n');
 }
 
-// =========== SUPABASE CONFIG ===========
-// ⚠️ SUPABASE_URLとSUPABASE_ANON_KEYを自分のプロジェクトの値に変更してください
-var SUPABASE_URL = 'https://zboxiyrinucvjwuicsso.supabase.co';
-var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpib3hpeXJpbnVjdmp3dWljc3NvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5MTcyNDIsImV4cCI6MjA5MDQ5MzI0Mn0.DrE6y32aKNug4WQ-ppPMeHRDFNCRzUEUuPkyd5Y02JU';
-var supabase = null; // Supabase clientは認証後に初期化
-
-var MOCK_MODE = false; // Supabase統合版は本番モード // テストモード：trueでダミーデータ、falseで本番API
-var GEMINI_API_KEY = 'AIzaSyCSydp3wq3bD7ybAfOJljBHTk5W-8SFgQs';
+var MOCK_MODE = true; // テストモード：trueでダミーデータ、falseで本番API
 
 var MOCK_DATA = {
   comp: `【競合5社リスト】
@@ -1644,6 +1550,9 @@ var MOCK_DATA = {
 メインビジュアル: 緊急性を演出するボタン。申し込みの簡単さを示すステップ図（3ステップ）。`
 };
 
+async function saveAIResponseToDB(prompt, response){
+  try{if(!supabase||!currentUser)return;await supabase.from('lp_data').insert({project_name:lpFD.name||'未設定',input_text:prompt.substring(0,2000),ai_response:response.substring(0,5000),created_by:currentUser.id});}catch(e){console.warn('DB save:',e);}
+}
 async function callAI(prompt, el, cb){
   el.innerHTML='<div class="loading-pulse"><div class="pulse-dots"><span></span><span></span><span></span></div><span>AI生成中...</span></div>';
   if(MOCK_MODE){
@@ -1652,51 +1561,19 @@ async function callAI(prompt, el, cb){
     if(prompt.includes('競合'))txt=MOCK_DATA.comp;
     else if(prompt.includes('ペルソナ'))txt=MOCK_DATA.persona;
     else if(prompt.includes('アイデア')||prompt.includes('構成案'))txt=MOCK_DATA.idea;
-    else if(prompt.includes('CR')||prompt.includes('クリエイティブ'))txt=mockCR||'CR案のテストデータ';
-    else txt='【テストモード】\n\nAIとの接続テスト用のダミーレスポンスです。';
+    else if(prompt.includes('CR') || prompt.includes('クリエイティブ'))txt=mockCR||'CR案のテストデータ';
+    else txt='【テストモード】\n\nAIとの接続テスト用のダミーレスポンスです。\n実際のAPI接続時はここにリアルタイムの分析結果が表示されます。';
     if(cb)cb(txt);
     return;
   }
   try{
-    // Gemini API直接呼び出し
-    var res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key='+GEMINI_API_KEY, {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        contents:[{parts:[{text: prompt}]}],
-        generationConfig:{maxOutputTokens:4000, temperature:0.7}
-      })
-    });
-    var data = await res.json();
-    if(!res.ok || data.error){
-      el.innerHTML='<div class="alert alert-red"><span class="alert-icon">⚠</span>Gemini APIエラー: '+(data.error?.message||res.status)+'</div>';
-      return;
-    }
-    var txt = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    if(!txt){
-      el.innerHTML='<div class="alert alert-red"><span class="alert-icon">⚠</span>AIからの応答が空でした。もう一度お試しください。</div>';
-      return;
-    }
-    if(cb){
-      cb(txt);
-      saveAIResponseToDB(prompt, txt);
-    }
-  } catch(e){
-    el.innerHTML='<div class="alert alert-red"><span class="alert-icon">⚠</span>通信エラー: '+e.message+'</div>';
-  }
-}
-
-async function saveAIResponseToDB(prompt, response){
-  try{
-    var session = supabase.auth.session ? supabase.auth.session() : (await supabase.auth.getSession()).data.session;
-    if(!session) return;
-    await supabase.from('lp_data').insert({
-      project_name: lpFD.name || crState._project || '未設定',
-      input_text: prompt.substring(0, 2000),
-      ai_response: response.substring(0, 5000),
-      created_by: session.user.id
-    });
-  } catch(e){ console.warn('DB save error:', e); }
+    var res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key='+GEMINI_API_KEY,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:4000,temperature:0.7}})});
+    var data=await res.json();
+    if(!res.ok||data.error){el.innerHTML='<div class="alert alert-red"><span class="alert-icon">⚠</span>Geminiエラー: '+(data.error?.message||res.status)+'</div>';return;}
+    var txt=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
+    if(!txt){el.innerHTML='<div class="alert alert-red"><span class="alert-icon">⚠</span>応答が空でした。もう一度お試しください。</div>';return;}
+    if(cb){cb(txt);saveAIResponseToDB(prompt,txt);}
+  }catch(e){el.innerHTML='<div class="alert alert-red"><span class="alert-icon">⚠</span>通信エラー: '+e.message+'</div>';}
 }
 
 function runComp(){
@@ -3634,29 +3511,6 @@ function handleAppealKeydown(e){
 function toggleCvOptionEl(el){
   toggleCvOption(el.getAttribute('data-opt'), el);
 }
-
-async function handlePasswordUpdate(){
-  var pw = document.getElementById('new-password').value;
-  var pw2 = document.getElementById('new-password-confirm').value;
-  var errEl = document.getElementById('recovery-error');
-  errEl.textContent = '';
-  if(!pw || pw.length < 8){ errEl.textContent = '8文字以上のパスワードを入力してください'; return; }
-  if(pw !== pw2){ errEl.textContent = 'パスワードが一致しません'; return; }
-  var btn = document.getElementById('recovery-btn');
-  btn.disabled = true; btn.textContent = '設定中...';
-  try{
-    const { error } = await supabase.auth.updateUser({ password: pw });
-    if(error) throw error;
-    document.getElementById('recovery-overlay').style.display = 'none';
-    window.location.hash = '';
-    showApp();
-    updateUserUI();
-    loadSharedHistory();
-  } catch(e){
-    errEl.textContent = 'エラー: ' + e.message;
-    btn.disabled = false; btn.textContent = 'パスワードを設定する';
-  }
-}
 // =========== EXPIRE ===========
 function daysUntil(d){if(!d)return 9999;var n=new Date();n.setHours(0,0,0,0);return Math.ceil((new Date(d)-n)/86400000);}
 function checkExpires(proj){
@@ -3816,15 +3670,9 @@ function eHtml(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>
 function esc(s){return s.replace(/'/g,"\\'");}
 
 // =========== INIT ===========
-// initSupabase()がwindow.loadイベントで実行されます
+updateHomeStats();
 // Show test mode banner
-(function(){
-  var banner=document.createElement('div');
-  banner.id='test-mode-banner';
-  banner.innerHTML='テストモード稼働中 — AIはダミーデータを返します　<button onclick="MOCK_MODE=false;this.parentNode.innerHTML=\'本番APIモードに切り替えました ✓\';this.parentNode.style.background=\'rgba(52,208,112,0.15)\';this.parentNode.style.borderColor=\'rgba(52,208,112,0.3)\';" style="margin-left:12px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:3px 10px;border-radius:4px;cursor:pointer;font-size:11px;">本番APIに切り替える</button>';
-  banner.style.cssText='position:fixed;bottom:0;left:0;right:0;background:rgba(245,166,35,0.15);border-top:1px solid rgba(245,166,35,0.3);color:#f5c060;font-size:12px;padding:8px 20px;z-index:9999;display:flex;align-items:center;font-family:DM Mono,monospace;';
-  document.body.appendChild(banner);
-})();
+// 本番モード
 
 function closeProjFolderInner(){var el=document.getElementById('proj-folder-inner');if(el)el.innerHTML='';}
 // ===== PICKER MODAL =====
@@ -3832,186 +3680,41 @@ function openPicker(id){document.getElementById(id).classList.add('open');docume
 function closePicker(id){document.getElementById(id).classList.remove('open');document.body.style.overflow='';}
 function closePickerOut(e,id){if(e.target===document.getElementById(id))closePicker(id);}
 
-
-// =========== SUPABASE AUTH ===========
-var currentUser = null;
-
+// =========== AUTH ===========
 async function initSupabase(){
-  // Supabase JS SDK v2 - wait for SDK to load
-  var attempts = 0;
-  while(!(window.supabase && window.supabase.createClient) && attempts < 30){
-    await new Promise(r=>setTimeout(r,200));
-    attempts++;
-  }
-  if(!(window.supabase && window.supabase.createClient)){
-    var errEl = document.getElementById('login-error');
-    if(errEl) errEl.textContent = 'SDKの読み込みに失敗しました。ページを再読み込みしてください。';
-    return;
-  }
-  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-  // パスワードリセットのハッシュを検出
-  var hash = window.location.hash;
-  if(hash.includes('type=recovery') || hash.includes('type=invite')){
-    // recoveryトークンをセッションに変換
-    const { data, error } = await supabase.auth.getSession();
-    document.getElementById('recovery-overlay').style.display = 'flex';
-    document.getElementById('login-overlay').style.display = 'none';
-    document.getElementById('app-wrapper').style.display = 'none';
-    return;
-  }
-
-  // 現在のセッション確認
-  const { data: { session } } = await supabase.auth.getSession();
-  if(session && session.user){
-    currentUser = session.user;
-    // recoveryセッションの場合はパスワード設定画面を表示
-    if(hash.includes('access_token') && !hash.includes('type=recovery')){
-      // 通常ログイン後のハッシュ — そのままアプリ表示
-    }
-    showApp();
-    updateUserUI();
-    loadSharedHistory();
-  } else {
-    showLoginScreen();
-  }
-  
-  // 認証状態の変化を監視
-  supabase.auth.onAuthStateChange(function(event, session){
-    if(event === 'PASSWORD_RECOVERY'){
-      // パスワードリセット画面を表示
-      document.getElementById('recovery-overlay').style.display = 'flex';
-      document.getElementById('login-overlay').style.display = 'none';
-      document.getElementById('app-wrapper').style.display = 'none';
-    } else if(event === 'SIGNED_IN' && session){
-      currentUser = session.user;
-      // パスワードリセット後のSIGNED_INはrecovery画面を維持
-      var hash = window.location.hash;
-      if(hash.includes('type=recovery')){
-        document.getElementById('recovery-overlay').style.display = 'flex';
-        return;
-      }
-      document.getElementById('recovery-overlay').style.display = 'none';
-      showApp();
-      updateUserUI();
-      loadSharedHistory();
-    } else if(event === 'SIGNED_OUT'){
-      currentUser = null;
-      document.getElementById('recovery-overlay').style.display = 'none';
-      showLoginScreen();
-    }
+  var attempts=0;
+  while(!(window.supabase&&window.supabase.createClient)&&attempts<30){await new Promise(r=>setTimeout(r,200));attempts++;}
+  if(!(window.supabase&&window.supabase.createClient)){var e=document.getElementById('login-error');if(e)e.textContent='SDKエラー。再読み込みしてください。';return;}
+  supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+  const{data:{session}}=await supabase.auth.getSession();
+  if(session){currentUser=session.user;showApp();}else{showLoginScreen();}
+  supabase.auth.onAuthStateChange(function(event,session){
+    if(event==='SIGNED_IN'&&session){currentUser=session.user;showApp();}
+    else if(event==='SIGNED_OUT'){currentUser=null;showLoginScreen();}
   });
 }
-
-function showLoginScreen(){
-  document.getElementById('login-overlay').style.display = 'flex';
-  document.getElementById('app-wrapper').style.display = 'none';
-}
-
-function showApp(){
-  document.getElementById('login-overlay').style.display = 'none';
-  document.getElementById('app-wrapper').style.display = 'flex';
-}
-
-function updateUserUI(){
-  if(!currentUser) return;
-  var email = currentUser.email || '';
-  var initials = email.substring(0,2).toUpperCase();
-  var el = document.getElementById('user-badge');
-  if(el) el.textContent = initials;
-  var emailEl = document.getElementById('user-email');
-  if(emailEl) emailEl.textContent = email;
-}
-
+function showLoginScreen(){document.getElementById('login-overlay').style.display='flex';document.getElementById('app-wrapper').style.display='none';}
+function showApp(){document.getElementById('login-overlay').style.display='none';document.getElementById('app-wrapper').style.display='flex';updateUserUI();}
+function updateUserUI(){if(!currentUser)return;var email=currentUser.email||'';var el=document.getElementById('user-badge');if(el)el.textContent=email.substring(0,2).toUpperCase();var emailEl=document.getElementById('user-email');if(emailEl)emailEl.textContent=email;}
 async function handleLogin(){
-  var email = document.getElementById('login-email').value.trim();
-  var password = document.getElementById('login-password').value;
-  var errEl = document.getElementById('login-error');
-  errEl.textContent = '';
-  
-  if(!email || !password){ errEl.textContent = 'メールアドレスとパスワードを入力してください'; return; }
-  
-  var loginBtn = document.getElementById('login-btn');
-  loginBtn.disabled = true;
-  loginBtn.textContent = 'ログイン中...';
-  
+  var email=document.getElementById('login-email').value.trim();
+  var password=document.getElementById('login-password').value;
+  var errEl=document.getElementById('login-error');errEl.textContent='';
+  if(!email||!password){errEl.textContent='メールアドレスとパスワードを入力してください';return;}
+  var btn=document.querySelector('#login-overlay .btn-primary');
+  if(btn){btn.disabled=true;btn.textContent='ログイン中...';}
   try{
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if(error) throw error;
-  } catch(e){
-    errEl.textContent = 'ログインに失敗しました: ' + (e.message || 'メールアドレスまたはパスワードが正しくありません');
-    loginBtn.disabled = false;
-    loginBtn.textContent = 'ログイン';
+    const{data,error}=await supabase.auth.signInWithPassword({email,password});
+    if(error)throw error;
+  }catch(e){
+    errEl.textContent='ログインに失敗しました: '+(e.message||'パスワードが正しくありません');
+    if(btn){btn.disabled=false;btn.textContent='ログイン';}
   }
 }
-
-async function handleLogout(){
-  await supabase.auth.signOut();
-}
-
-// =========== 共有履歴 ===========
-async function loadSharedHistory(){
-  try{
-    const { data, error } = await supabase
-      .from('lp_data')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(50);
-    if(error) throw error;
-    window.sharedHistory = data || [];
-    renderSharedHistory();
-  } catch(e){ console.warn('History load error:', e); }
-}
-
-function renderSharedHistory(){
-  var area = document.getElementById('shared-history-list');
-  if(!area) return;
-  var data = window.sharedHistory || [];
-  if(!data.length){
-    area.innerHTML = '<p style="color:var(--text3);font-size:13px;text-align:center;padding:24px">まだ履歴がありません</p>';
-    return;
-  }
-  area.innerHTML = data.map(function(item){
-    var date = item.created_at ? new Date(item.created_at).toLocaleDateString('ja-JP', {month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}) : '';
-    var preview = (item.ai_response||'').substring(0,100).replace(/\n/g,' ');
-    return '<div class="result-card-item" data-hid="'+item.id+'" onclick="openHistoryDetailEl(this)">'
-      +'<div class="result-card-header">'
-      +'<span class="result-perf-badge rpb-good">'+( item.project_name||'不明')+'</span>'
-      +'<span style="font-size:11px;color:var(--text3);margin-left:auto">'+date+'</span>'
-      +'</div>'
-      +'<div class="result-card-title" style="font-size:13px;color:var(--text2)">'+preview+'…</div>'
-      +'</div>';
-  }).join('');
-}
-
-function openHistoryDetail(id){
-  var item = (window.sharedHistory||[]).find(function(h){return h.id===id;});
-  if(!item) return;
-  var modal = document.getElementById('history-detail-modal');
-  document.getElementById('history-detail-project').textContent = item.project_name || '不明';
-  document.getElementById('history-detail-date').textContent = item.created_at ? new Date(item.created_at).toLocaleString('ja-JP') : '';
-  document.getElementById('history-detail-input').textContent = (item.input_text||'').substring(0,300);
-  document.getElementById('history-detail-response').textContent = item.ai_response || '';
-  modal.style.display = 'flex';
-}
-
-// Enter key login
-document.addEventListener('keydown', function(e){
-  if(e.key === 'Enter' && document.getElementById('login-overlay').style.display !== 'none'){
-    handleLogin();
-  }
-});
-
-// Init on load
-window.addEventListener('load', function(){
-  initSupabase();
-  updateHomeStats();
-});
-
-function openHistoryDetailEl(el){
-  openHistoryDetail(el.getAttribute('data-hid'));
-}
-
+async function handleLogout(){await supabase.auth.signOut();}
+document.addEventListener('keydown',function(e){var lo=document.getElementById('login-overlay');if(e.key==='Enter'&&lo&&lo.style.display!=='none')handleLogin();});
+window.addEventListener('load',function(){initSupabase();updateHomeStats();});
 </script>
+</div><!-- /app-wrapper -->
 </body>
 </html>
