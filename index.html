@@ -1841,21 +1841,20 @@ function runComp(){
   
   // Collect URLs + media per row
   var entries = [];
-  var mediaOpts = ['meta','TikTok','YDA','YSA','Google','LINE','YouTube','アドネットワーク','スマートニュース','グノシー'];
   for(var i=1;i<=5;i++){
     var urlEl = document.getElementById('comp-url-'+i);
     if(!urlEl || !urlEl.value.trim()) continue;
     var url = urlEl.value.trim();
     var media = '';
-    document.querySelectorAll('[data-row="'+i+'"]').forEach(function(b){
-      if(b.style.borderColor && b.style.borderColor.includes('accent') || b.style.background){
-        if(b.getAttribute('data-media')) media = b.getAttribute('data-media');
+    var rowBtns = document.querySelectorAll('[data-row="'+i+'"][data-media]');
+    rowBtns.forEach(function(b){
+      if(b.style.background && b.style.background.indexOf('123') > -1){
+        media = b.getAttribute('data-media');
       }
     });
     entries.push({url:url, media:media});
   }
   
-  // Save to lpFD
   lpFD.compUrls = entries.map(function(e){return e.url;});
   lpFD.compMediaPerUrl = entries.map(function(e){return e.media;});
   
@@ -1864,52 +1863,48 @@ function runComp(){
     return;
   }
   
-  // Build URL list with media
   var urlList = entries.map(function(e,i){
-    return (i+1)+'. URL: '+e.url+(e.media?' （媒体: '+e.media+'）':'');
+    return 'COMP_'+(i+1)+': '+e.url+(e.media?' [媒体:'+e.media+']':'');
   }).join('\n');
   
-  // Media context
-  var allMedia = entries.map(function(e){return e.media;}).filter(Boolean);
   var mediaContext = '';
+  var allMedia = entries.map(function(e){return e.media;}).filter(Boolean);
   if(allMedia.length){
-    mediaContext = '\n\n【媒体別LP特性の考慮点】\n';
+    mediaContext = '\n\n【媒体別分析ポイント】\n';
     if(allMedia.some(function(m){return m==='Google'||m==='YSA'||m==='YDA';}))
-      mediaContext += '・検索系（Google/YSA/YDA）: 顕在層向け。具体的な価格・比較・信頼情報を重視\n';
+      mediaContext += '・検索系: 顕在層向けのため価格・比較・信頼情報を重点分析\n';
     if(allMedia.some(function(m){return m==='meta'||m==='TikTok'||m==='YouTube';}))
-      mediaContext += '・SNS系（meta/TikTok/YouTube）: 潜在層向け。感情訴求・ビジュアル・共感ストーリーを重視\n';
+      mediaContext += '・SNS系: 潜在層向けのため感情訴求・ビジュアル・共感ポイントを重点分析\n';
     if(allMedia.some(function(m){return m==='LINE'||m==='アドネットワーク'||m==='スマートニュース'||m==='グノシー';}))
-      mediaContext += '・記事/アドネ系（LINE/スマニュ等）: 情報収集層向け。読みやすさ・情報量・信頼性を重視\n';
+      mediaContext += '・記事/アドネ系: 情報収集層向けのため読みやすさ・情報量・信頼性を重点分析\n';
   }
   
-  var prompt = '以下の競合LP URLを一つずつ分析して、各URLについて詳細情報を出力してください。\n\n'
-    +'【自社案件情報】\n'+lpContext()+buildAnkenContext(lpFD.name||'')+'\n\n'
-    +'【分析する競合URL一覧】\n'+urlList
+  var prompt = 
+    '以下の'+entries.length+'つの競合URLのみを分析してください。\n'
+    +'入力されたURL以外の架空の競合は絶対に追加しないでください。\n\n'
+    +'【自社案件情報】\n'+lpContext()+buildAnkenContext(lpFD.name||'')
     +mediaContext+'\n\n'
-    +'【重要な指示】\n'
-    +'・入力されたURLのページ内容をもとに分析してください\n'
-    +'・URLにアクセスできない場合は「アクセス不可」と記載し、URLから推測できる情報のみ記載\n'
-    +'・架空の情報は絶対に作らないでください\n\n'
-    +'【出力形式】入力されたURLについて以下の形式で出力（入力数分のみ出力）：\n\n'
-    +'COMP:1\n'
-    +'企業名: （URLドメインや会社名）\n'
-    +'URL: （入力されたURL）\n'
-    +'媒体: （選択された媒体）\n'
-    +'キャッチコピー: （LPのメインコピーやタイトルから）\n'
-    +'強み1: （LPから読み取れる強み）\n'
-    +'強み2: \n'
-    +'強み3: \n'
-    +'オファー: （価格・キャンペーン・特典）\n\n'
-    +'COMP:2\n'
-    +'（2つ目のURLがある場合）\n\n'
-    +'WIN:競合に勝てるポイント\n'
-    +'1. （競合の弱点・空白地帯を踏まえた具体的な差別化ポイント）\n'
-    +'2. \n'
-    +'3. \n\n'
+    +'【分析対象URL（'+entries.length+'件のみ）】\n'+urlList+'\n\n'
+    +'【出力ルール】\n'
+    +'・必ず入力された'+entries.length+'件のURLのみを分析すること\n'
+    +'・架空の競合・URLを追加しないこと\n'
+    +'・URLにアクセスできない場合は「アクセス不可」と記載し、URLドメインから推測できる情報のみ記載\n\n'
+    +'【出力形式】\n\n'
+    +entries.map(function(e,i){
+      return 'COMP:'+(i+1)+'\n'
+        +'企業名: （URLのドメインやサイト名）\n'
+        +'URL: '+e.url+'\n'
+        +(e.media?'媒体: '+e.media+'\n':'')
+        +'キャッチコピー: （LPのメインコピー）\n'
+        +'強み1: \n'
+        +'強み2: \n'
+        +'強み3: \n'
+        +'オファー: （価格・キャンペーン・特典）\n';
+    }).join('\n')
+    +'\nWIN:競合に勝てるポイント\n'
+    +'1. \n2. \n3. \n\n'
     +'ADD:LPに追加すべき内容\n'
-    +'1. （競合分析をもとに追加すると効果的な要素）\n'
-    +'2. \n'
-    +'3. ';
+    +'1. \n2. \n3. ';
   
   callAI(prompt, area, function(txt){
     lpFD.comp=txt;
