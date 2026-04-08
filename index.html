@@ -1640,7 +1640,7 @@ async function callAI(prompt, el, cb){
 
 function runComp(){
   var area=document.getElementById('comp-area');
-  callAI('以下の案件情報をもとに競合5社を想定し分析してください。\n\n'+lpContext()+buildResultContext()+buildAuditContext()+buildAnkenContext(lpFD.name||'')+'\n\n出力形式：\n【競合5社リスト】\n各社：案件名 / 想定URL / キャッチコピー / 強み / オファー\n\n【配信案件が競合5社に勝てるポイント（3点）】\n\n【LPに追加すべき内容（3点）】',area,function(txt){
+  callAI('以下の案件情報をもとに、実際に存在する競合他社を5社リサーチして分析してください。\n\n'+lpContext()+buildResultContext()+buildAuditContext()+buildAnkenContext(lpFD.name||'')+'\n\n【重要な指示】\n・実際に存在する企業・サービスのみを記載してください\n・URLは実在するものだけ記載し、不明な場合はURLなしとしてください\n・架空の企業・URLは絶対に作らないでください\n\n出力形式：\n【競合5社リスト】\n各社：\n企業名: （実在する企業名）\nURL: （実在するURL、不明な場合は「要確認」）\nキャッチコピー: （実際のLP・広告から確認できるもの）\n強み: （実際の特徴・差別化ポイント）\nオファー: （実際の料金・キャンペーン）\n\n【この案件が競合5社に勝てるポイント（3点）】\n競合の弱点・空白地帯を踏まえた具体的な差別化ポイントを記載\n\n【LPに追加すべき内容（3点）】\n競合分析をもとに、このLPに追加すると効果的な要素を記載',area,function(txt){
     lpFD.comp=txt;
     area.innerHTML=renderCompCards(txt);
     var b=document.getElementById('btn-to4');if(b)b.disabled=false;
