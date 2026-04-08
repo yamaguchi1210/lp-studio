@@ -1331,6 +1331,23 @@ function openAiHistoryDetail(id){
   modal.style.display = 'flex';
 }
 
+
+var compSelectedMedia = [];
+function toggleCompMedia(btn, media){
+  var idx = compSelectedMedia.indexOf(media);
+  if(idx > -1){
+    compSelectedMedia.splice(idx, 1);
+    btn.style.borderColor = '';
+    btn.style.background = '';
+    btn.style.color = '';
+  } else {
+    compSelectedMedia.push(media);
+    btn.style.borderColor = 'var(--accent)';
+    btn.style.background = 'rgba(123,111,240,0.15)';
+    btn.style.color = 'var(--accent3)';
+  }
+}
+
 // =========== NAV ===========
 function navTo(id, navEl) {
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
@@ -1433,9 +1450,25 @@ function renderLpStep(step){
     </div>`;
     footer.innerHTML='<button class="btn btn-ghost" onclick="renderLpStep(1)">← 戻る</button><button class="btn btn-primary" onclick="saveLp2()">次へ：競合分析 →</button>';
   } else if(step===3){
-    body.innerHTML=sb+getDataInsightBanner()+`
-    <p style="font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.7">案件詳細・KPIをもとにAIが競合5社をピックアップし、勝てるポイントと追加すべき内容を提案します。</p>
-    <div id="comp-area"><button class="btn btn-teal" onclick="runComp()">AIで競合5社を分析する</button></div>`;
+    var mediaOpts = ['meta','TikTok','YDA','YSA','Google','LINE','YouTube','アドネ','スマートニュース','グノシー'];
+    var mediaButtons = mediaOpts.map(function(m){
+      var sel = (lpFD.compMedia||[]).indexOf(m) > -1;
+      return '<button class="media-btn'+(sel?' sel-active':'')+'" style="'+(sel?'border-color:var(--accent);background:rgba(123,111,240,0.15);color:var(--accent3)':'')+'" onclick="toggleCompMedia(\"'+m+'\",this)">'+m+'</button>';
+    }).join('');
+    var urlInputs = '';
+    for(var ui=1;ui<=5;ui++){
+      var savedUrl = (lpFD.compUrls&&lpFD.compUrls[ui-1])||'';
+      urlInputs += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">'
+        +'<span style="font-size:12px;color:var(--text3);font-family:DM Mono,monospace;width:16px;flex-shrink:0">'+ui+'</span>'
+        +'<input class="form-input" id="comp-url-'+ui+'" placeholder="https://競合サイトのURL" value="'+savedUrl+'" style="flex:1">'
+        +'</div>';
+    }
+    body.innerHTML=sb+getDataInsightBanner()
+      +'<div class="section-label" style="margin-bottom:10px">配信媒体を選択 <span style="font-size:10px;color:var(--text3);font-weight:400">（複数選択可）</span></div>'
+      +'<div class="media-btn-grid" style="grid-template-columns:repeat(5,1fr);margin-bottom:20px">'+mediaButtons+'</div>'
+      +'<div class="section-label" style="margin-bottom:10px">競合サイトのURLを入力 <span style="font-size:10px;color:var(--text3);font-weight:400">（1〜5件）</span></div>'
+      +'<div style="margin-bottom:16px">'+urlInputs+'</div>'
+      +'<div id="comp-area"><button class="btn btn-teal" onclick="runComp()">AIで競合を分析する</button></div>';
     footer.innerHTML='<button class="btn btn-ghost" onclick="renderLpStep(2)">← 戻る</button><button class="btn btn-primary" id="btn-to4" disabled onclick="renderLpStep(4)">次へ：ペルソナ →</button>';
   } else if(step===4){
     body.innerHTML=sb+`
@@ -1768,9 +1801,68 @@ async function callAI(prompt, el, cb){
   }catch(e){el.innerHTML='<div class="alert alert-red"><span class="alert-icon">⚠</span>通信エラー: '+e.message+'</div>';}
 }
 
+
+function toggleCompMedia(m, btn){
+  if(!lpFD.compMedia) lpFD.compMedia = [];
+  var idx = lpFD.compMedia.indexOf(m);
+  if(idx > -1){
+    lpFD.compMedia.splice(idx, 1);
+    btn.style.borderColor='';
+    btn.style.background='';
+    btn.style.color='';
+  } else {
+    lpFD.compMedia.push(m);
+    btn.style.borderColor='var(--accent)';
+    btn.style.background='rgba(123,111,240,0.15)';
+    btn.style.color='var(--accent3)';
+  }
+}
+
 function runComp(){
   var area=document.getElementById('comp-area');
-  callAI('以下の案件情報をもとに、実際に存在する競合他社を5社リサーチして分析してください。\n\n'+lpContext()+buildResultContext()+buildAuditContext()+buildAnkenContext(lpFD.name||'')+'\n\n【重要な指示】\n・実際に存在する企業・サービスのみを記載してください\n・URLは実在するものだけ記載し、不明な場合はURLなしとしてください\n・架空の企業・URLは絶対に作らないでください\n\n出力形式：\n【競合5社リスト】\n各社：\n企業名: （実在する企業名）\nURL: （実在するURL、不明な場合は「要確認」）\nキャッチコピー: （実際のLP・広告から確認できるもの）\n強み: （実際の特徴・差別化ポイント）\nオファー: （実際の料金・キャンペーン）\n\n【この案件が競合5社に勝てるポイント（3点）】\n競合の弱点・空白地帯を踏まえた具体的な差別化ポイントを記載\n\n【LPに追加すべき内容（3点）】\n競合分析をもとに、このLPに追加すると効果的な要素を記載',area,function(txt){
+  // Collect URLs
+  var urls = [];
+  for(var i=1;i<=5;i++){
+    var el=document.getElementById('comp-url-'+i);
+    if(el&&el.value.trim()) urls.push(el.value.trim());
+  }
+  lpFD.compUrls = urls;
+  if(!urls.length){
+    area.innerHTML='<div class="alert alert-amber"><span class="alert-icon">⚠</span>競合サイトのURLを1つ以上入力してください</div>';
+    return;
+  }
+  var mediaStr = (lpFD.compMedia&&lpFD.compMedia.length) ? lpFD.compMedia.join('・') : '未選択';
+  var urlList = urls.map(function(u,i){return (i+1)+'. '+u;}).join('\n');
+  var prompt = '以下の競合サイトURLを分析して、各サイトの情報を整理してください。\n\n'
+    +'【案件情報】\n'+lpContext()+'\n\n'
+    +'【配信媒体】\n'+mediaStr+'\n\n'
+    +'【分析する競合URL】\n'+urlList+'\n\n'
+    +'【媒体特性を踏まえた分析指示】\n'
+    +(mediaStr.includes('Google')||mediaStr.includes('YSA')||mediaStr.includes('YDA')
+      ? '・検索系媒体（顕在層向け）のため、具体的な訴求・価格・CTA重視で分析\n'
+      : '')
+    +(mediaStr.includes('meta')||mediaStr.includes('TikTok')||mediaStr.includes('Instagram')
+      ? '・SNS系媒体（潜在層向け）のため、ビジュアル訴求・共感・ストーリー性重視で分析\n'
+      : '')
+    +(mediaStr.includes('LINE')||mediaStr.includes('アドネ')||mediaStr.includes('スマートニュース')||mediaStr.includes('グノシー')
+      ? '・記事系媒体のため、コンテンツの読みやすさ・情報量・信頼性重視で分析\n'
+      : '')
+    +'\n各URLについて以下の形式で出力してください：\n\n'
+    +'COMP:1\n'
+    +'企業名: \n'
+    +'URL: \n'
+    +'キャッチコピー: \n'
+    +'強み1: \n'
+    +'強み2: \n'
+    +'強み3: \n'
+    +'オファー: \n\n'
+    +'（全URLについて同様に出力）\n\n'
+    +'WIN:競合に勝てるポイント\n'
+    +'1. \n2. \n3. \n\n'
+    +'ADD:LPに追加すべき内容\n'
+    +'1. \n2. \n3. \n\n'
+    +'※'+mediaStr+'向けのLPとして最適化された提案にしてください';
+  callAI(prompt, area, function(txt){
     lpFD.comp=txt;
     area.innerHTML=renderCompCards(txt);
     saveToHistory('comp', lpContext(), txt);
