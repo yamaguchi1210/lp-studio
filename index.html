@@ -1742,9 +1742,24 @@ async function callAI(prompt, el, cb){
     return;
   }
   try{
-    var res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key='+GEMINI_API_KEY,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:4000,temperature:0.7}})});
+    // 競合分析はGoogle検索グラウンディング付きで実行
+    var useSearch = prompt.includes('実在する') || prompt.includes('競合') || prompt.includes('リサーチ');
+    var requestBody = {
+      contents:[{parts:[{text:prompt}]}],
+      generationConfig:{maxOutputTokens:4000,temperature:0.7}
+    };
+    if(useSearch){
+      requestBody.tools = [{google_search:{}}];
+    }
+    var model = useSearch ? 'gemini-1.5-pro' : 'gemini-1.5-flash';
+    var res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+model+':generateContent?key='+GEMINI_API_KEY,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(requestBody)});
     var data=await res.json();
-    if(!res.ok||data.error){el.innerHTML='<div class="alert alert-red"><span class="alert-icon">⚠</span>Geminiエラー: '+(data.error?.message||res.status)+'</div>';return;}
+    if(!res.ok||data.error){
+      // Fallback to flash without search if pro fails
+      var res2=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key='+GEMINI_API_KEY,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:4000,temperature:0.7}})});
+      data=await res2.json();
+      if(!res2.ok||data.error){el.innerHTML='<div class="alert alert-red"><span class="alert-icon">⚠</span>Geminiエラー: '+(data.error?.message||res2.status)+'</div>';return;}
+    }
     var txt=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
     if(!txt){el.innerHTML='<div class="alert alert-red"><span class="alert-icon">⚠</span>応答が空でした。もう一度お試しください。</div>';return;}
     if(cb){cb(txt);saveAIResponseToDB(prompt,txt);}
@@ -1762,7 +1777,7 @@ function runComp(){
 }
 function runPersona(){
   var area=document.getElementById('persona-area');
-  callAI('以下の案件情報と競合分析をもとにターゲットペルソナを3種提案してください。\n\n'+lpContext()+'\n\n競合分析:\n'+(lpFD.comp||'なし')+buildResultContext()+'\n\n各ペルソナ：\n■ペルソナ1 年齢・性別・居住地 / 悩み / 理想\n■ペルソナ2 年齢・性別・居住地 / 悩み / 理想\n■ペルソナ3 年齢・性別・居住地 / 悩み / 理想\n\n優先度順に記載してください。',area,function(txt){
+  callAI('以下の案件情報と競合分析をもとにターゲットペルソナを必ず3種類提案してください。\n\n'+lpContext()+'\n\n競合分析:\n'+(lpFD.comp||'なし')+buildResultContext()+'\n\n【重要】必ず以下の形式で3つのペルソナを全て出力してください。\n\n■ペルソナ1（最優先）\n年齢・性別・居住地: \n悩み: \n理想: \n\n■ペルソナ2\n年齢・性別・居住地: \n悩み: \n理想: \n\n■ペルソナ3\n年齢・性別・居住地: \n悩み: \n理想: \n\n各ペルソナは年齢層・悩みの種類・ライフスタイルが異なる具体的な人物像にしてください。優先度順に記載してください。',area,function(txt){
     lpFD.persona=txt;
     area.innerHTML=renderPersonaCards(txt);
     saveToHistory('persona', lpContext(), txt);
