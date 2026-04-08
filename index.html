@@ -693,6 +693,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
       </button>
     </div>
     <div class="nav-section">
+      <div class="nav-section-label">履歴</div>
+      <button class="nav-item" onclick="renderAiHistory();navTo('ai-history',this)">
+        <span class="nav-dot"></span>AI生成履歴
+      </button>
+    </div>
+    <div class="nav-section">
       <div class="nav-section-label">Coming Soon</div>
       <button class="nav-item" onclick="navTo('info',this)">
         <span class="nav-dot"></span>情報追加
@@ -1038,6 +1044,17 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
   </div>
   <div class="page-body" id="anken-detail-body"></div>
 </div>
+
+<!-- AI履歴 -->
+<div class="screen" id="s-ai-history">
+  <div class="page-header">
+    <div class="page-header-row">
+      <div><div class="page-title">AI生成履歴</div><div class="page-sub">競合分析・ペルソナ・LP構成案・修正案の履歴</div></div>
+      <button class="btn btn-ghost btn-sm" onclick="renderAiHistory()">↻ 更新</button>
+    </div>
+  </div>
+  <div class="page-body"><div id="ai-history-list"></div></div>
+</div>
 </div><!-- /main -->
 <div id="audit-warning-bar" class="audit-warning-bar"></div>
 </div><!-- /app -->
@@ -1191,6 +1208,7 @@ var DB = {
   adResults:[],
   auditData:{medical:[], media:[], clinic:[]},
   ankenData:[],
+  aiHistory:[],
   labelFolders:[
     {id:'lf1',name:'案件別',folderColor:'#7b6ff0',labels:[
       {id:'l1',name:'スルリム',color:'#7b6ff0'},
@@ -1218,6 +1236,101 @@ var lpStep = 1;
 var lpFD = {};
 var selBase='',selLp='',selStr='',selAudit=1;
 
+
+// =========== LOCAL STORAGE ===========
+function saveToLocal(){
+  try{
+    localStorage.setItem('lpstudio_db', JSON.stringify({
+      lpTypes: DB.lpTypes,
+      designs: DB.designs,
+      parts: DB.parts,
+      projects: DB.projects,
+      casting: DB.casting,
+      projectFolders: DB.projectFolders,
+      adResults: DB.adResults,
+      auditData: DB.auditData,
+      ankenData: DB.ankenData,
+      labelFolders: DB.labelFolders,
+      aiHistory: DB.aiHistory
+    }));
+  }catch(e){console.warn('Save error:',e);}
+}
+
+function loadFromLocal(){
+  try{
+    var saved = localStorage.getItem('lpstudio_db');
+    if(!saved) return;
+    var data = JSON.parse(saved);
+    if(data.lpTypes) DB.lpTypes = data.lpTypes;
+    if(data.designs) DB.designs = data.designs;
+    if(data.parts) DB.parts = data.parts;
+    if(data.projects) DB.projects = data.projects;
+    if(data.casting) DB.casting = data.casting;
+    if(data.projectFolders) DB.projectFolders = data.projectFolders;
+    if(data.adResults) DB.adResults = data.adResults;
+    if(data.auditData) DB.auditData = data.auditData;
+    if(data.ankenData) DB.ankenData = data.ankenData;
+    if(data.labelFolders) DB.labelFolders = data.labelFolders;
+    if(data.aiHistory) DB.aiHistory = data.aiHistory;
+    console.log('✅ データを復元しました');
+  }catch(e){console.warn('Load error:',e);}
+}
+
+
+// =========== AI HISTORY ===========
+function saveToHistory(type, inputSummary, result){
+  var now = new Date();
+  var dateStr = now.toLocaleDateString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
+  DB.aiHistory.unshift({
+    id: Date.now(),
+    type: type,
+    project: lpFD.name || crState._project || '未設定',
+    inputSummary: inputSummary.substring(0,200),
+    result: result.substring(0,3000),
+    date: dateStr
+  });
+  // Keep max 50 entries
+  if(DB.aiHistory.length > 50) DB.aiHistory = DB.aiHistory.slice(0,50);
+  saveToLocal();
+}
+
+function renderAiHistory(){
+  var area = document.getElementById('ai-history-list');
+  if(!area) return;
+  if(!DB.aiHistory.length){
+    area.innerHTML='<div style="text-align:center;padding:40px;color:var(--text3);font-size:13px">まだ履歴がありません</div>';
+    return;
+  }
+  var typeLabel = {'comp':'競合分析','persona':'ペルソナ','idea':'LP構成案','fix':'修正案','cr':'CR作成案'};
+  var typeColor = {'comp':'var(--accent)','persona':'var(--teal)','idea':'var(--amber)','fix':'var(--red)','cr':'var(--pink)'};
+  area.innerHTML = DB.aiHistory.map(function(item){
+    var color = typeColor[item.type] || 'var(--accent)';
+    var label = typeLabel[item.type] || item.type;
+    var preview = item.result.substring(0,120).replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,' ');
+    return '<div class="result-card-item" onclick="openAiHistoryDetail('+item.id+')" style="cursor:pointer">'
+      +'<div class="result-card-header">'
+      +'<span class="result-perf-badge" style="background:'+color+'22;color:'+color+';border:1px solid '+color+'44">'+label+'</span>'
+      +'<span class="result-media-tag" style="margin-left:8px">'+item.project+'</span>'
+      +'<span style="font-size:11px;color:var(--text3);margin-left:auto">'+item.date+'</span>'
+      +'</div>'
+      +'<div style="font-size:12px;color:var(--text2);margin-top:4px;line-height:1.6">'+preview+'…</div>'
+      +'</div>';
+  }).join('');
+}
+
+function openAiHistoryDetail(id){
+  var item = DB.aiHistory.find(function(h){return h.id===id;});
+  if(!item) return;
+  var modal = document.getElementById('ai-history-modal');
+  if(!modal) return;
+  var typeLabel = {'comp':'競合分析','persona':'ペルソナ','idea':'LP構成案','fix':'修正案','cr':'CR作成案'};
+  document.getElementById('ai-history-modal-title').textContent = (typeLabel[item.type]||item.type)+' — '+item.project;
+  document.getElementById('ai-history-modal-date').textContent = item.date;
+  document.getElementById('ai-history-modal-input').textContent = item.inputSummary;
+  document.getElementById('ai-history-modal-result').textContent = item.result;
+  modal.style.display = 'flex';
+}
+
 // =========== NAV ===========
 function navTo(id, navEl) {
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
@@ -1232,7 +1345,7 @@ function navTo(id, navEl) {
     'home':'s-home','lp-new':'s-lp-new','lp-fix':'s-lp-fix',
     'sozai-lp':'s-sozai-lp','sozai-design':'s-sozai-design','sozai-parts':'s-sozai-parts','sozai-sozai':'s-sozai-sozai','info':'s-info','info-result':'s-info-result','info-result-new':'s-info-result-new','info-result-detail':'s-info-result-detail','info-audit':'s-info-audit','cr':'s-cr',
     'lp-type-detail':'s-lp-type-detail','design-cat':'s-design-cat','design-item':'s-design-item',
-    'parts-cat':'s-parts-cat','parts-item':'s-parts-item','cast-list':'s-cast-list','talent':'s-talent'
+    'parts-cat':'s-parts-cat','parts-item':'s-parts-item','ai-history':'s-ai-history','cast-list':'s-cast-list','talent':'s-talent'
   };
   var sid = screenMap[id] || ('s-'+id);
   var el = document.getElementById(sid);
@@ -1643,6 +1756,7 @@ function runComp(){
   callAI('以下の案件情報をもとに、実際に存在する競合他社を5社リサーチして分析してください。\n\n'+lpContext()+buildResultContext()+buildAuditContext()+buildAnkenContext(lpFD.name||'')+'\n\n【重要な指示】\n・実際に存在する企業・サービスのみを記載してください\n・URLは実在するものだけ記載し、不明な場合はURLなしとしてください\n・架空の企業・URLは絶対に作らないでください\n\n出力形式：\n【競合5社リスト】\n各社：\n企業名: （実在する企業名）\nURL: （実在するURL、不明な場合は「要確認」）\nキャッチコピー: （実際のLP・広告から確認できるもの）\n強み: （実際の特徴・差別化ポイント）\nオファー: （実際の料金・キャンペーン）\n\n【この案件が競合5社に勝てるポイント（3点）】\n競合の弱点・空白地帯を踏まえた具体的な差別化ポイントを記載\n\n【LPに追加すべき内容（3点）】\n競合分析をもとに、このLPに追加すると効果的な要素を記載',area,function(txt){
     lpFD.comp=txt;
     area.innerHTML=renderCompCards(txt);
+    saveToHistory('comp', lpContext(), txt);
     var b=document.getElementById('btn-to4');if(b)b.disabled=false;
   });
 }
@@ -1651,6 +1765,7 @@ function runPersona(){
   callAI('以下の案件情報と競合分析をもとにターゲットペルソナを3種提案してください。\n\n'+lpContext()+'\n\n競合分析:\n'+(lpFD.comp||'なし')+buildResultContext()+'\n\n各ペルソナ：\n■ペルソナ1 年齢・性別・居住地 / 悩み / 理想\n■ペルソナ2 年齢・性別・居住地 / 悩み / 理想\n■ペルソナ3 年齢・性別・居住地 / 悩み / 理想\n\n優先度順に記載してください。',area,function(txt){
     lpFD.persona=txt;
     area.innerHTML=renderPersonaCards(txt);
+    saveToHistory('persona', lpContext(), txt);
     var b=document.getElementById('btn-to5');if(b)b.disabled=false;
   });
 }
@@ -1660,6 +1775,7 @@ function runIdea(){
   var lpN={design:'デザインLP',article:'記事LP',survey:'アンケートLP',flip:'めくるLP',guide:'誘導LP'};
   callAI('以下の情報をもとにLP構成案のアイデアを3案生成してください。\n\n'+lpContext()+'\n\nLPの型: '+(lpN[selLp]||selLp)+'\n構成: '+selStr+'\n審査基準: '+modes[selAudit-1]+buildResultContext()+buildAuditContext()+buildAnkenContext(lpFD.name||'')+'\n\n各案につき各セクション（FV・共感・ベネフィット・CTA等）ごとに：キャッチコピー案 / メインビジュアルの方向性 を出力してください。\n\n審査基準「'+modes[selAudit-1]+'」に沿った訴求でお願いします。',area,function(txt){
     area.innerHTML='<div class="ai-block">'+eHtml(txt)+'</div>';
+    saveToHistory('idea', lpContext()+' 型:'+selLp+' 構成:'+selStr, txt);
   });
 }
 function runFinalOutput(){
@@ -1695,7 +1811,8 @@ SECTION:デザイン・レイアウト|STARS:2|PRIORITY:low
     await new Promise(r=>setTimeout(r,1000));
     area.innerHTML=renderFixCards(fixMock);
   } else {
-    await callAI('以下のLP修正案件について改善ポイントを提案してください。各観点を「SECTION:タイトル|STARS:重要度1-5|PRIORITY:high/mid/low」の形式で始め、その下に箇条書きで改善点を記載してください。観点は：FV、コピー・訴求、CTA・導線、審査・コンプライアンス、デザイン・レイアウトの5項目。\n\n実際のLP修正依頼。\n\nLP: '+v('fix-url')+'\n修正目的: '+v('fix-goal')+'\n課題: '+v('fix-issue')+'\nKPI: '+v('fix-kpi'),area,function(txt){area.innerHTML=renderFixCards(txt);});
+    await callAI('以下のLP修正案件について改善ポイントを提案してください。各観点を「SECTION:タイトル|STARS:重要度1-5|PRIORITY:high/mid/low」の形式で始め、その下に箇条書きで改善点を記載してください。観点は：FV、コピー・訴求、CTA・導線、審査・コンプライアンス、デザイン・レイアウトの5項目。\n\n実際のLP修正依頼。\n\nLP: '+v('fix-url')+'\n修正目的: '+v('fix-goal')+'\n課題: '+v('fix-issue')+'\nKPI: '+v('fix-kpi'),area,function(txt){area.innerHTML=renderFixCards(txt);
+    saveToHistory('fix', v('fix-url')+' '+v('fix-goal'), txt);});
   }
   btn.disabled=false;btn.textContent='AIで改善ポイントを分析';
 }
@@ -2113,7 +2230,7 @@ function saveNgItem(){
   var t=CTX.talent;
   if(!Array.isArray(t.ngList))t.ngList=[];
   t.ngList.push(val);
-  renderNgList();
+  saveToLocal();renderNgList();
   document.getElementById('ng-add-area').style.display='none';
 }
 function editNgItem(i){
@@ -2792,6 +2909,7 @@ function saveResultData(){
     apo: (document.getElementById('rf-apo')||{}).value||'',
     date: dateStr
   });
+  saveToLocal();
   navTo('info-result', null);
 }
 
@@ -2903,6 +3021,7 @@ function saveAuditData(){
   var now = new Date();
   var dateStr = now.getFullYear()+'/'+String(now.getMonth()+1).padStart(2,'0')+'/'+String(now.getDate()).padStart(2,'0');
   DB.auditData[auditFormType].push({id:Date.now(), target:auditTarget, content:el.value.trim(), date:dateStr});
+  saveToLocal();
   closePicker('audit-form-modal');
   renderAuditPage();
 }
@@ -3496,7 +3615,7 @@ function saveAnkenData(){
 
   if(ankenEditId != null){ DB.ankenData[ankenEditId] = data; }
   else { DB.ankenData.push(data); }
-
+  saveToLocal();
   navTo('info-anken', null);
 }
 
@@ -3648,13 +3767,13 @@ function modalOk(){
   if(modalType==='add-lp-type'){
     if(!m('m1'))return alert('名前を入力してください');
     DB.lpTypes.push({id:Date.now(),name:m('m1'),url:m('m2'),note:m('m3')});
-    renderLpTypeList();closeModal();
+    renderLpTypeList();saveToLocal();closeModal();
   } else if(modalType==='add-design-item'){
     if(!m('m1'))return alert('LP名を入力してください');
     var cat=CTX.dcat;
     if(!DB.designs[cat])DB.designs[cat]=[];
     DB.designs[cat].push({id:Date.now(),name:m('m1'),url:m('m2'),img:m('m3'),data:m('m4'),labels:(window._modalLabelIds||[]).slice()});
-    renderDesignCatBody(cat);closeModal();
+    renderDesignCatBody(cat);saveToLocal();closeModal();
   } else if(modalType==='edit-design-data'){
     var item=(DB.designs[CTX.dcat]||[]).find(x=>x.id===CTX.did);
     if(item)item.data=m('m1');openDesignItem(CTX.dcat,CTX.did);closeModal();
@@ -3663,17 +3782,17 @@ function modalOk(){
     var cat=CTX.pcat;
     if(!DB.parts[cat])DB.parts[cat]=[];
     DB.parts[cat].push({id:Date.now(),name:m('m1'),img:m('m2'),url:m('m3'),data:m('m4'),labels:(window._modalLabelIds||[]).slice()});
-    renderPartsCatBody(cat);closeModal();
+    renderPartsCatBody(cat);saveToLocal();closeModal();
   } else if(modalType==='add-project'){
     if(!m('m1'))return alert('案件名を入力してください');
     DB.projects.push(m('m1'));DB.casting[m('m1')]=[];
-    renderAnkenList();closeModal();
+    saveToLocal();renderAnkenList();closeModal();
   } else if(modalType==='add-casting'){
     if(!m('m1'))return alert('名前を入力してください');
     var p=CTX.proj;
     if(!DB.casting[p])DB.casting[p]=[];
     DB.casting[p].push({id:Date.now(),name:m('m1'),expire:m('m2'),img:m('m3'),movies:[],stills:[],ng:''});
-    renderCastBody(p);closeModal();
+    renderCastBody(p);saveToLocal();closeModal();
   } else if(modalType==='add-movie'){
     if(!m('m1'))return alert('ファイル名を入力してください');
     var mFolder=CTX.talent.folders?CTX.talent.folders.find(function(f){return f.id==='movies';}):null;
@@ -3821,8 +3940,29 @@ async function handleLogin(){
 }
 async function handleLogout(){await supabase.auth.signOut();}
 document.addEventListener('keydown',function(e){var lo=document.getElementById('login-overlay');if(e.key==='Enter'&&lo&&lo.style.display!=='none')handleLogin();});
-window.addEventListener('load',function(){initSupabase();updateHomeStats();});
+window.addEventListener('load',function(){loadFromLocal();initSupabase();updateHomeStats();});
 </script>
+
+<!-- AI履歴詳細モーダル -->
+<div id="ai-history-modal" style="position:fixed;inset:0;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center;z-index:9998;padding:20px;backdrop-filter:blur(4px)">
+  <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);padding:24px;width:100%;max-width:600px;max-height:85vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div>
+        <div style="font-size:16px;font-weight:600" id="ai-history-modal-title"></div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px" id="ai-history-modal-date"></div>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('ai-history-modal').style.display='none'">✕ 閉じる</button>
+    </div>
+    <div style="margin-bottom:12px">
+      <div style="font-size:11px;font-weight:500;color:var(--text3);font-family:DM Mono,monospace;margin-bottom:6px">INPUT</div>
+      <div id="ai-history-modal-input" style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius2);padding:10px 13px;font-size:12px;color:var(--text2);line-height:1.6;max-height:100px;overflow-y:auto;white-space:pre-wrap"></div>
+    </div>
+    <div>
+      <div style="font-size:11px;font-weight:500;color:var(--text3);font-family:DM Mono,monospace;margin-bottom:6px">AI RESPONSE</div>
+      <div id="ai-history-modal-result" style="background:var(--bg3);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius2);padding:12px 14px;font-size:12px;color:var(--text2);line-height:1.8;white-space:pre-wrap;max-height:400px;overflow-y:auto"></div>
+    </div>
+  </div>
+</div>
 </div><!-- /app-wrapper -->
 </body>
 </html>
