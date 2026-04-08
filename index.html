@@ -1565,17 +1565,12 @@ function getDataInsightBanner(){
 function buildResultContext(){
   var good = (DB.adResults||[]).filter(function(r){return r.perf==='good';});
   if(!good.length) return '';
-  var ctx = '
-
-【過去の好調CRデータ（参考）】
-';
+  var ctx = '\n\n【過去の好調CRデータ（参考）】\n';
   good.slice(0,3).forEach(function(r,i){
     ctx += (i+1)+'. 媒体:'+r.mediaLabel;
     if(r.cpa) ctx += ' CPA:¥'+Number(r.cpa).toLocaleString();
-    if(r.appeal) ctx += '
-   訴求:'+r.appeal.substring(0,60);
-    ctx += '
-';
+    if(r.appeal) ctx += '\n   訴求:'+r.appeal.substring(0,60);
+    ctx += '\n';
   });
   return ctx;
 }
@@ -1583,13 +1578,9 @@ function buildResultContext(){
 function buildAuditContext(){
   var all = [].concat(DB.auditData.medical||[], DB.auditData.media||[], DB.auditData.clinic||[]);
   if(!all.length) return '';
-  var ctx = '
-
-【審査基準（蓄積データ）】
-';
+  var ctx = '\n\n【審査基準（蓄積データ）】\n';
   all.slice(0,5).forEach(function(d){
-    ctx += '・'+d.content.substring(0,80)+'
-';
+    ctx += '・'+d.content.substring(0,80)+'\n';
   });
   return ctx;
 }
@@ -3770,8 +3761,7 @@ function renderSharedHistory(){
   if(!data.length){area.innerHTML='<p style="color:var(--text3);font-size:13px;text-align:center;padding:24px">まだ履歴がありません</p>';return;}
   area.innerHTML=data.map(function(item){
     var date=item.created_at?new Date(item.created_at).toLocaleDateString('ja-JP',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}):'';
-    var preview=(item.ai_response||'').substring(0,100).replace(/
-/g,' ');
+    var preview=(item.ai_response||'').substring(0,100).replace(/\n/g,' ');
     return '<div class="result-card-item" data-hid="'+item.id+'" onclick="openHistoryDetailEl(this)">'
       +'<div class="result-card-header">'
       +'<span class="result-perf-badge rpb-good">'+(item.project_name||'不明')+'</span>'
