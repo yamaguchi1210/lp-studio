@@ -1582,216 +1582,12 @@ function lpContext(){
   return lines.join('\n');
 }
 
-var MOCK_MODE = true; // テストモード：trueでダミーデータ、falseで本番API
-
-var MOCK_DATA = {
-  comp: `【競合5社リスト】
-
-1. スリムビューティクリニック
-   URL: https://slim-beauty.example.com
-   キャッチコピー: 「医師監修で-5kg。リバウンドしない体へ」
-   強み: 症例数10,000件以上、全国15院展開
-   オファー: 初回カウンセリング無料 + 体験施術50%OFF
-
-2. メディカルスリム東京
-   URL: https://medical-slim-tokyo.example.com
-   キャッチコピー: 「注射で痩せる。通わなくていい痩身医療」
-   強み: オンライン診療対応、最短即日発送
-   オファー: 初回限定3,980円スタートプラン
-
-3. ビューティメッドクリニック
-   URL: https://beautymed.example.com
-   キャッチコピー: 「女医が診る、あなただけのダイエット処方」
-   強み: 女医在籍、完全個室、完全予約制
-   オファー: LINE登録で無料カウンセリング
-
-4. スルスルメディカル
-   URL: https://suru-med.example.com
-   キャッチコピー: 「食事制限なし。薬で脂肪を燃やす新常識」
-   強み: 独自の燃焼カクテル注射、3ヶ月保証付き
-   オファー: モニター価格 初月50%OFF
-
-5. ナチュラルスリムケア
-   URL: https://natural-slim.example.com
-   キャッチコピー: 「体に優しい、ゆっくり確実に痩せる医療」
-   強み: 漢方×医療の融合、副作用リスク最小化
-   オファー: 無料体質診断 + 初回施術プレゼント
-
-【配信案件が競合5社に勝てるポイント】
-
-1. 独自メソッドによる差別化
-   競合は「注射」「薬」など施術単体の訴求が多い中、貴案件の独自性を前面に出すことで記憶に残るLPになります。
-
-2. CV地点（LINE登録）の最適化
-   他社は来院型CTAが主流ですが、LINE登録という低ハードルのCVは獲得単価を大きく下げられます。
-
-3. オファーの希少性と限定感
-   競合のオファーは「割引」が中心ですが、「体験＋保証」セットにすることで信頼感と緊急性を同時に演出できます。
-
-【LPに追加すべき内容】
-
-1. ビフォーアフター症例写真
-   競合全社が掲載しており、ない場合は信頼性で大きく劣後します。実際の症例を最低5件以上掲載推奨。
-
-2. 医師・スタッフの顔出しプロフィール
-   医療系LPでは「誰が施術するか」が重要な判断基準。医師の経歴・資格を明示することで安心感が増します。
-
-3. よくある質問（FAQ）セクション
-   「痛みは？」「副作用は？」「費用は？」など不安点を先回りして解消することで離脱率を下げられます。`,
-
-  persona: `■ペルソナ1（最優先）
-年齢・性別・居住地: 34歳・女性・東京都在住
-悩み: 産後3年が経過しても体型が戻らず、特に下腹部と太ももの脂肪が気になる。育児と仕事で忙しく運動する時間が取れない。食事制限を試みるも続かず自己嫌悪に陥っている。
-理想: 子どもの運動会や学校行事に自信を持って参加できる体型に。昔着ていた洋服が再び着られるようになりたい。夫に「綺麗になったね」と言われたい。
-
-■ペルソナ2
-年齢・性別・居住地: 42歳・女性・神奈川県在住
-悩み: 更年期に入り急に体重が増加。基礎代謝が落ちて食事を減らしても痩せなくなった。ジムに通ったが効果が出ず挫折。医療的なアプローチを検討し始めている。
-理想: 同世代の友人より若く見られたい。健康診断の数値を改善したい。ショッピングを楽しめる体型になりたい。
-
-■ペルソナ3
-年齢・性別・居住地: 26歳・女性・大阪府在住
-悩み: SNSで同世代のスタイルの良い投稿を見るたびに自信をなくす。結婚式・旅行・イベントなど直前に「痩せなきゃ」と焦るが間に合わない。短期間で結果を出す方法を探している。
-理想: インスタに自信を持って自分の写真を載せたい。好きなブランドの服をかっこよく着こなしたい。彼氏や友人から「細くなった？」と言われたい。`,
-
-  idea: `【案1：共感ストーリー型】
-審査基準に沿った構成案です。
-
-■FV（ファーストビュー）
-キャッチコピー案:「もう、頑張らなくていい。医師が一緒に痩せてくれる。」
-メインビジュアル: 30代女性が鏡の前で笑顔になっているシーン。白衣の医師が隣に立つ構図。明るく清潔感のある医療空間。
-
-■共感パート
-キャッチコピー案:「食事制限、ジム、サプリ…全部試したのに、なぜ痩せないの？」
-メインビジュアル: 悩む女性のリアルなイラスト。失敗した方法のアイコン（×マーク付き）を並べた図解。
-
-■ベネフィットパート
-キャッチコピー案:「医師監修の個別プログラムで、あなたの体質に合った方法を。」
-メインビジュアル: ビフォーアフター比較写真（体型の変化が分かる正面・横から）。数値データのグラフ。
-
-■CTA
-キャッチコピー案:「まずはLINEで無料相談。今だけ初回カウンセリング無料。」
-メインビジュアル: LINEボタン（緑色）を大きく配置。スマホで操作する女性の手元アップ。
-
----
-
-【案2：実績・証拠型】
-
-■FV
-キャッチコピー案:「累計〇〇人が実感。医師が処方する、やせる習慣。」
-メインビジュアル: 数字を前面に出したデザイン。症例数・満足度・リピート率を大きく表示。
-
-■共感パート
-キャッチコピー案:「一人ひとり、太る理由が違う。だから、痩せる方法も違う。」
-メインビジュアル: 異なるタイプの女性3名の写真。それぞれの悩みテキストを吹き出しで表示。
-
-■ベネフィットパート
-キャッチコピー案:「あなたの体質を診断。最適な痩身プランをご提案します。」
-メインビジュアル: 診断フロー図。医師との問診イメージ写真。
-
-■CTA
-キャッチコピー案:「今すぐ体質診断→LINEで無料結果を受け取る」
-メインビジュアル: 診断スタートボタン（大きめ、動きのあるデザイン）。
-
----
-
-【案3：限定・緊急性型】
-
-■FV
-キャッチコピー案:「【先着30名限定】初回500円モニター募集中。」
-メインビジュアル: カウントダウンタイマーまたは残り枠数の表示。赤・黒の強調カラー。インパクト重視のデザイン。
-
-■共感パート
-キャッチコピー案:「続かない、効かない、リバウンドする——もう繰り返しません。」
-メインビジュアル: 過去の失敗を示す暗いトーンから、成功後の明るいトーンへのビジュアル変化。
-
-■ベネフィットパート
-キャッチコピー案:「医師が処方。だから効く、続く、戻らない。3つの保証付き。」
-メインビジュアル: 保証バッジ3つのデザイン。医師の顔写真と推薦コメント。
-
-■CTA
-キャッチコピー案:「残り〇枠。今すぐLINEで申し込む→」
-メインビジュアル: 緊急性を演出するボタン。申し込みの簡単さを示すステップ図（3ステップ）。`
-};
+var MOCK_MODE = false; // テストモード：trueでダミーデータ、falseで本番API
 
 
-// =========== HELPER FUNCTIONS ===========
-function getDataInsightBanner(){
-  var good = (DB.adResults||[]).filter(function(r){return r.perf==='good';}).length;
-  var audit = (DB.auditData.medical||[]).length + (DB.auditData.media||[]).length + (DB.auditData.clinic||[]).length;
-  if(!good && !audit) return '';
-  var parts = [];
-  if(good) parts.push('<strong>'+good+'件</strong>の好調CR');
-  if(audit) parts.push('<strong>'+audit+'件</strong>の審査基準');
-  return '<div class="data-insight-banner"><span class="dib-icon">📊</span><div class="dib-text">蓄積データ: '+parts.join('・')+'をAI分析に反映します</div></div>';
-}
-
-function buildResultContext(){
-  var good = (DB.adResults||[]).filter(function(r){return r.perf==='good';});
-  if(!good.length) return '';
-  var ctx = '\n\n【過去の好調CRデータ（参考）】\n';
-  good.slice(0,3).forEach(function(r,i){
-    ctx += (i+1)+'. 媒体:'+r.mediaLabel;
-    if(r.cpa) ctx += ' CPA:¥'+Number(r.cpa).toLocaleString();
-    if(r.appeal) ctx += '\n   訴求:'+r.appeal.substring(0,60);
-    ctx += '\n';
-  });
-  return ctx;
-}
-
-function buildAuditContext(){
-  var all = [].concat(DB.auditData.medical||[], DB.auditData.media||[], DB.auditData.clinic||[]);
-  if(!all.length) return '';
-  var ctx = '\n\n【審査基準（蓄積データ）】\n';
-  all.slice(0,5).forEach(function(d){
-    ctx += '・'+d.content.substring(0,80)+'\n';
-  });
-  return ctx;
-}
-
-function selectMedia(id){
-  resultFormState.media = id;
-  // Save current field values
-  var mDefs = {meta:['headline','maintext','adcopy'],tiktok:['maintext','adcopy'],line:['title','desc','adcopy'],youtube:['title','desc','adcopy']};
-  var savedFields = {};
-  (mDefs[resultFormState.media]||[]).forEach(function(f){var el=document.getElementById('rf-'+f);if(el)savedFields[f]=el.value;});
-  resultFormState.savedFields = savedFields;
-  resultFormState.savedAppeal = (document.getElementById('rf-appeal')||{}).value||'';
-  resultFormState.savedNote = (document.getElementById('rf-note')||{}).value||'';
-  resultFormState.savedCV = (document.getElementById('rf-cv')||{}).value||'';
-  resultFormState.savedCPA = (document.getElementById('rf-cpa')||{}).value||'';
-  resultFormState.savedAPO = (document.getElementById('rf-apo')||{}).value||'';
-  var body = document.getElementById('result-form-body');
-  if(body) body.innerHTML = renderResultFormHTML();
-}
-
-function selectPerf(perf){
-  resultFormState.perf = perf;
-  var body = document.getElementById('result-form-body');
-  if(body) body.innerHTML = renderResultFormHTML();
-}
-
-function updateUploadLabel(input){
-  var lbl = document.getElementById('rf-file-label');
-  if(lbl && input.files[0]) lbl.textContent = '📎 '+input.files[0].name;
-}
-
-async function saveAIResponseToDB(prompt, response){
-  try{if(!supabase||!currentUser)return;await supabase.from('lp_data').insert({project_name:lpFD.name||'未設定',input_text:prompt.substring(0,2000),ai_response:response.substring(0,5000),created_by:currentUser.id});}catch(e){console.warn('DB save:',e);}
-}
 async function callAI(prompt, el, cb){
   el.innerHTML='<div class="loading-pulse"><div class="pulse-dots"><span></span><span></span><span></span></div><span>AI生成中...</span></div>';
-  if(MOCK_MODE){
-    await new Promise(r=>setTimeout(r,1200));
-    var txt='';
-    if(prompt.includes('競合'))txt=MOCK_DATA.comp;
-    else if(prompt.includes('ペルソナ'))txt=MOCK_DATA.persona;
-    else if(prompt.includes('アイデア')||prompt.includes('構成案'))txt=MOCK_DATA.idea;
-    else if(prompt.includes('CR') || prompt.includes('クリエイティブ'))txt=mockCR||'CR案のテストデータ';
-    else txt='【テストモード】\n\nAIとの接続テスト用のダミーレスポンスです。\n実際のAPI接続時はここにリアルタイムの分析結果が表示されます。';
-    if(cb)cb(txt);
-    return;
-  }
+
   try{
     // 競合分析はGoogle検索グラウンディング付きで実行
     var useSearch = prompt.includes('実在する') || prompt.includes('競合') || prompt.includes('リサーチ');
@@ -1916,7 +1712,36 @@ function runComp(){
 
 function runPersona(){
   var area=document.getElementById('persona-area');
-  callAI('以下の案件情報と競合分析をもとにターゲットペルソナを必ず3種類提案してください。\n\n'+lpContext()+'\n\n競合分析:\n'+(lpFD.comp||'なし')+buildResultContext()+'\n\n【重要】必ず以下の形式で3つのペルソナを全て出力してください。\n\n■ペルソナ1（最優先）\n年齢・性別・居住地: \n悩み: \n理想: \n\n■ペルソナ2\n年齢・性別・居住地: \n悩み: \n理想: \n\n■ペルソナ3\n年齢・性別・居住地: \n悩み: \n理想: \n\n各ペルソナは年齢層・悩みの種類・ライフスタイルが異なる具体的な人物像にしてください。優先度順に記載してください。',area,function(txt){
+  var compContext = lpFD.comp ? '\n\n【競合分析結果】\n'+lpFD.comp.substring(0,1000) : '';
+  var prompt = '以下の案件情報と競合分析をもとに、ターゲットペルソナを必ず3種類作成してください。\n\n'
+    +'【案件情報】\n'+lpContext()
+    +compContext
+    +buildResultContext()
+    +'\n\n【重要な指示】\n'
+    +'・必ず■ペルソナ1〜3を全て出力すること\n'
+    +'・各ペルソナは年齢層・悩み・ライフスタイルが異なる具体的な人物像にすること\n'
+    +'・競合LPを見ているユーザー像をイメージして作成すること\n'
+    +'・優先度が高い順に記載すること\n\n'
+    +'【出力形式（この形式を厳守）】\n\n'
+    +'■ペルソナ1（最優先）\n'
+    +'年齢・性別・居住地: （例：34歳・女性・東京都在住）\n'
+    +'職業・ライフスタイル: \n'
+    +'悩み: （具体的に3〜4文で）\n'
+    +'理想: （具体的に3〜4文で）\n'
+    +'このLPを見るきっかけ: \n\n'
+    +'■ペルソナ2\n'
+    +'年齢・性別・居住地: \n'
+    +'職業・ライフスタイル: \n'
+    +'悩み: \n'
+    +'理想: \n'
+    +'このLPを見るきっかけ: \n\n'
+    +'■ペルソナ3\n'
+    +'年齢・性別・居住地: \n'
+    +'職業・ライフスタイル: \n'
+    +'悩み: \n'
+    +'理想: \n'
+    +'このLPを見るきっかけ: ';
+  callAI(prompt, area, function(txt){
     lpFD.persona=txt;
     area.innerHTML=renderPersonaCards(txt);
     saveToHistory('persona', lpContext(), txt);
@@ -1943,31 +1768,47 @@ async function runFix(){
   var btn=document.getElementById('fix-btn');
   btn.disabled=true;btn.textContent='分析中...';
   var area=document.getElementById('fix-result');
-  var fixMock=`SECTION:FV（ファーストビュー）|STARS:5|PRIORITY:high
-・キャッチコピーが長すぎて一瞬で伝わらない。7〜15文字程度に圧縮推奨。
-・メインビジュアルに人物写真がなく感情移入しにくい。ターゲット層に近い女性の笑顔写真を追加。
-・CTAボタンの色がグレーで目立たない。緑またはオレンジに変更し、コピーも「無料で試す」など行動喚起に。
-SECTION:コピー・訴求|STARS:4|PRIORITY:high
-・ベネフィットより機能説明が多い。「何ができるか」より「どう変わるか」の言葉に置き換える。
-・数字の根拠が薄い。「多くの方が」→「1,234名が実感（2024年調査）」のように具体化。
-SECTION:CTA・導線|STARS:3|PRIORITY:mid
-・CTAが1箇所しかない。FV・中盤・末尾の3箇所に設置し機会損失を減らす。
-・フォームの入力項目が多すぎる。まずLINE登録のみに絞り、詳細は後で取得。
-SECTION:審査・コンプライアンス|STARS:5|PRIORITY:high
-・「必ず痩せる」「〇kg減」などの断言表現が審査NGになる可能性。「個人差があります」の注記を追加。
-・医療広告ガイドラインに基づき、比較広告・体験談の表現を要確認。
-SECTION:デザイン・レイアウト|STARS:2|PRIORITY:low
-・全体的にテキスト量が多くスキャンしにくい。ブロックごとに視覚的区切りを設ける。
-・スマホでの表示確認が不足。ボタンサイズとフォントサイズをモバイル最適化する。`;
-  var prompt='LP修正分析：'+v('fix-url');
-  if(MOCK_MODE){
-    area.innerHTML='<div class="loading-pulse"><div class="pulse-dots"><span></span><span></span><span></span></div><span>AI生成中...</span></div>';
-    await new Promise(r=>setTimeout(r,1000));
-    area.innerHTML=renderFixCards(fixMock);
-  } else {
-    await callAI('以下のLP修正案件について改善ポイントを提案してください。各観点を「SECTION:タイトル|STARS:重要度1-5|PRIORITY:high/mid/low」の形式で始め、その下に箇条書きで改善点を記載してください。観点は：FV、コピー・訴求、CTA・導線、審査・コンプライアンス、デザイン・レイアウトの5項目。\n\n実際のLP修正依頼。\n\nLP: '+v('fix-url')+'\n修正目的: '+v('fix-goal')+'\n課題: '+v('fix-issue')+'\nKPI: '+v('fix-kpi'),area,function(txt){area.innerHTML=renderFixCards(txt);
-    saveToHistory('fix', v('fix-url')+' '+v('fix-goal'), txt);});
+
+  var fixUrl   = v('fix-url');
+  var fixGoal  = v('fix-goal');
+  var fixIssue = v('fix-issue');
+  var fixKpi   = v('fix-kpi');
+
+  if(!fixUrl.trim()){
+    area.innerHTML='<div class="alert alert-amber"><span class="alert-icon">⚠</span>LP URLまたは案件名を入力してください</div>';
+    btn.disabled=false;btn.textContent='AIで改善ポイントを分析';
+    return;
   }
+
+  var prompt =
+    '以下のLP修正依頼について、入力された情報をもとに具体的な改善ポイントを分析してください。\n\n'
+    +'【LP URL / 案件名】\n'+fixUrl+'\n'
+    +'【修正目的】\n'+fixGoal+'\n'
+    +'【現状の課題】\n'+(fixIssue||'記載なし')+'\n'
+    +'【現在のKPI・数値】\n'+(fixKpi||'記載なし')+'\n'
+    +buildAuditContext()
+    +'\n\n【重要な指示】\n'
+    +'・入力された課題・KPIをもとに分析すること\n'
+    +'・修正目的（'+fixGoal+'）に特化した提案にすること\n'
+    +'・架空の数値・事例は使わないこと\n\n'
+    +'【出力形式】以下の5つの観点について分析してください：\n\n'
+    +'SECTION:FV（ファーストビュー）|STARS:重要度1-5|PRIORITY:high/mid/low\n'
+    +'・改善ポイントを箇条書きで記載\n\n'
+    +'SECTION:コピー・訴求|STARS:|PRIORITY:\n'
+    +'・改善ポイント\n\n'
+    +'SECTION:CTA・導線|STARS:|PRIORITY:\n'
+    +'・改善ポイント\n\n'
+    +'SECTION:審査・コンプライアンス|STARS:|PRIORITY:\n'
+    +'・改善ポイント\n\n'
+    +'SECTION:デザイン・レイアウト|STARS:|PRIORITY:\n'
+    +'・改善ポイント\n\n'
+    +'※STARSは改善の緊急度（5が最高）、PRIORITYはhigh/mid/lowで記載';
+
+  await callAI(prompt, area, function(txt){
+    area.innerHTML=renderFixCards(txt);
+    saveToHistory('fix', fixUrl+' '+fixGoal+' 課題:'+fixIssue, txt);
+  });
+
   btn.disabled=false;btn.textContent='AIで改善ポイントを分析';
 }
 
@@ -2594,19 +2435,22 @@ function renderPersonaCards(txt){
     var lines = block.trim().split('\n').map(function(l){ return l.trim(); }).filter(Boolean);
     if(!lines.length) return;
 
-    var headerLine = lines[0]; // "1（最優先）" or "2" etc
+    var headerLine = lines[0];
     var numMatch = headerLine.match(/^(\d+)/);
     var num = numMatch ? numMatch[1] : String(i+1);
 
     var meta = '';
+    var job = '';
     var worry = '';
     var ideal = '';
-    var name = '';
+    var trigger = '';
 
     lines.forEach(function(line){
-      if(line.match(/^年齢|居住地/)) { meta = line.replace(/^年齢・性別・居住地[：:]\s*/,''); name = meta; }
+      if(line.match(/^年齢/)) { meta = line.replace(/^年齢・性別・居住地[：:]\s*/,''); }
+      else if(line.match(/^職業/)) job = line.replace(/^職業・ライフスタイル[：:]\s*/,'');
       else if(line.match(/^悩み/)) worry = line.replace(/^悩み[：:]\s*/,'');
       else if(line.match(/^理想/)) ideal = line.replace(/^理想[：:]\s*/,'');
+      else if(line.match(/^このLP/)) trigger = line.replace(/^このLPを見るきっかけ[：:]\s*/,'');
     });
 
     var idx = Math.min(i, 2);
@@ -2615,9 +2459,10 @@ function renderPersonaCards(txt){
     html += '<div class="persona-card">';
     html += '<div class="persona-header">';
     html += '<div class="persona-rank-badge '+rankClass[idx]+'">'+num+'</div>';
-    html += '<div style="flex:1"><div class="persona-name-large">'+(name||'ペルソナ '+num)+'</div>';
-    html += '<div class="persona-priority '+prioClass[idx]+'">'+(priorities[idx]||'')+'</div></div>';
-    html += '</div>';
+    html += '<div style="flex:1">';
+    html += '<div class="persona-name-large">'+(meta||'ペルソナ '+num)+'</div>';
+    html += '<div class="persona-priority '+prioClass[idx]+'">'+(priorities[idx]||'')+(job?' — '+job:'')+'</div>';
+    html += '</div></div>';
 
     html += '<div class="persona-body">';
     html += '<div class="persona-col">';
@@ -2629,6 +2474,13 @@ function renderPersonaCards(txt){
     html += '<div class="persona-col-text">'+eHtml(ideal||'—')+'</div>';
     html += '</div>';
     html += '</div>';
+
+    if(trigger){
+      html += '<div style="padding:10px 18px;border-top:1px solid var(--border);background:var(--bg4)">';
+      html += '<div style="font-size:10px;color:var(--text3);font-family:DM Mono,monospace;margin-bottom:4px">🔍 LPを見るきっかけ</div>';
+      html += '<div style="font-size:12px;color:var(--text2)">'+eHtml(trigger)+'</div>';
+      html += '</div>';
+    }
 
     if(tags.length){
       html += '<div class="persona-meta">';
