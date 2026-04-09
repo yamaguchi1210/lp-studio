@@ -1173,7 +1173,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
 // =========== SUPABASE CONFIG ===========
 var SUPABASE_URL = 'https://zboxiyrinucvjwuicsso.supabase.co';
 var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpib3hpeXJpbnVjdmp3dWljc3NvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5MTcyNDIsImV4cCI6MjA5MDQ5MzI0Mn0.DrE6y32aKNug4WQ-ppPMeHRDFNCRzUEUuPkyd5Y02JU';
-var GEMINI_API_KEY = 'AIzaSyCSydp3wq3bD7ybAfOJljBHTk5W-8SFgQs';
+var GEMINI_API_KEY = 'AIzaSyBdU2dNNZ7_m3j5bJpTXy3wNMvERT0Xux4';
 var MOCK_MODE = false;
 var supabase = null;
 var currentUser = null;
@@ -1665,7 +1665,7 @@ async function callAI(prompt, el, cb){
     var data=await res.json();
     if(!res.ok||data.error){
       // Fallback to flash without search if pro fails
-      var res2=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key='+GEMINI_API_KEY,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:4000,temperature:0.7}})});
+      var res2=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key='+GEMINI_API_KEY,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:4000,temperature:0.7}})});
       data=await res2.json();
       if(!res2.ok||data.error){el.innerHTML='<div class="alert alert-red"><span class="alert-icon">⚠</span>Geminiエラー: '+(data.error?.message||res2.status)+'</div>';return;}
     }
