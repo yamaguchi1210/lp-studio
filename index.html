@@ -1646,33 +1646,38 @@ function lpContext(){
 var MOCK_MODE = false; // テストモード：trueでダミーデータ、falseで本番API
 
 
-async function callAI(prompt, el, cb){
-  el.innerHTML='<div class="loading-pulse"><div class="pulse-dots"><span></span><span></span><span></span></div><span>AI生成中...</span></div>';
+async function callAI(prompt, el, cb) {
+  el.innerHTML = '<div class="loading-pulse"><div class="pulse-dots"><span></span><span></span><span></span></div><span>AI生成中...</span></div>';
 
-  try{
-    var res = await fetch(
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key='+GEMINI_API_KEY,
-      {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({
-          contents:[{parts:[{text:prompt}]}],
-          generationConfig:{maxOutputTokens:4000,temperature:0.7}
-        })
-      }
-    );
-    var data = await res.json();
-    if(!res.ok || data.error){
-      el.innerHTML='<div class="alert alert-red"><span class="alert-icon">⚠</span>Geminiエラー: '+(data.error?.message||res.status)+'</div>';
-      return;
-    }
-    var txt = data.candidates?.[0]?.content?.parts?.[0]?.text||'';
-    if(!txt){
-      el.innerHTML='<div class="alert alert-red"><span class="alert-icon">⚠</span>応答が空でした。もう一度お試しください。</div>';
-      return;
-    }
-    if(cb){cb(txt);saveAIResponseToDB(prompt,txt);}
-  }catch(e){el.innerHTML='<div class="alert alert-red"><span class="alert-icon">⚠</span>通信エラー: '+e.message+'</div>';}}
+  try {
+    // ⚠️ ここに、Supabaseでコピーした長い英数字（Anon Key）を貼り付けてください
+    const ANON_KEY = 'ここにAnonKeyを貼り付け';
+
+    const res = await fetch('https://zboxiyrinucvjwuicsso.supabase.co/functions/v1/smooth-task', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + ANON_KEY,
+        'apikey': ANON_KEY
+      },
+      body: JSON.stringify({
+        prompt: prompt
+      })
+    });
+
+    if (!res.ok) throw new Error('Communication Error');
+
+    const data = await res.json();
+    // Supabase（Gemini）から返ってきたテキストを取り出す
+    const aiText = data.candidates[0].content.parts[0].text;
+
+    if (cb) cb(aiText);
+
+  } catch (e) {
+    console.error(e);
+    el.innerHTML = '<div style="color:#ff6b6b;padding:10px;">エラー: ' + e.message + '</div>';
+  }
+} // ← この閉じカッコを消さないように注意！
 
 
 function toggleCompMedia(m, btn){
