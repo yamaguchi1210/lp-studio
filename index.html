@@ -1646,27 +1646,39 @@ function lpContext(){
 var MOCK_MODE = false; // テストモード：trueでダミーデータ、falseで本番API
 
 
-async function callAI(prompt, el, cb){
-  el.innerHTML='<div class="loading-pulse"><div class="pulse-dots"><span></span><span></span><span></span></div><span>AI生成中...</span></div>';
+async function callAI(prompt, el, cb) {
+  el.innerHTML = '<div class="loading-pulse"><div class="pulse-dots"><span></span><span></span><span></span></div><span>AI生成中...</span></div>';
 
   try {
-    // 1. 送信先を「Google」から「あなたのSupabase」に変更します
-    var res = await fetch(
-      'https://zboxiyrinucvjwuicsso.supabase.co/functions/v1/smooth-task', 
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          // 2. Supabaseを通るための通行証（Anon Key）をセットします
-          'Authorization': 'Bearer ' + 'ここにSupabaseのAnon Keyを貼り付け',
-          'apikey': 'ここにSupabaseのAnon Keyを貼り付け'
-        },
-        // 3. データの送り方をSupabaseのプログラム（金庫番）に合わせて整理します
-        body: JSON.stringify({
-          prompt: prompt
-        })
-      }
-    );
+    // ⚠️ 下の ' ' の中に、Supabaseでコピーした長い英数字を貼り付けてください
+    const ANON_KEY = 'ここにAnonKeyを貼り付け'; 
+
+    var res = await fetch('https://zboxiyrinucvjwuicsso.supabase.co/functions/v1/smooth-task', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + ANON_KEY,
+        'apikey': ANON_KEY
+      },
+      body: JSON.stringify({
+        prompt: prompt
+      })
+    });
+
+    if (!res.ok) throw new Error('Network response was not ok');
+
+    var data = await res.json();
+    
+    // Geminiの回答から文字だけを取り出す（ここはSupabaseの設定に合わせています）
+    var aiText = data.candidates[0].content.parts[0].text;
+
+    if (cb) cb(aiText);
+
+  } catch (e) {
+    console.error(e);
+    el.innerHTML = '<div style="color:#ff6b6b;padding:10px;">エラー: ' + e.message + '</div>';
+  }
+}
 
     // 以降、結果を受け取る処理（cbなど）へ続く...    var data = await res.json();
     if(!res.ok || data.error){
