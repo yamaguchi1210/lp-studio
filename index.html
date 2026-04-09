@@ -1643,17 +1643,16 @@ function lpContext(){
   return lines.join('\n');
 }
 
-var MOCK_MODE = false; // テストモード：trueでダミーデータ、falseで本番API
-
+var MOCK_MODE = false;
 
 async function callAI(prompt, el, cb) {
   el.innerHTML = '<div class="loading-pulse"><div class="pulse-dots"><span></span><span></span><span></span></div><span>AI生成中...</span></div>';
 
   try {
-    // ⚠️ 下の ' ' の中に、Supabaseでコピーした長い英数字を貼り付けてください
-    const ANON_KEY = 'ここにAnonKeyを貼り付け'; 
+    // ⚠️ 必ず ' ' の中を、実際の長い英数字（Anon Key）に書き換えてください
+    const ANON_KEY = 'あなたのAnonKeyをここに貼り付け'; 
 
-    var res = await fetch('https://zboxiyrinucvjwuicsso.supabase.co/functions/v1/smooth-task', {
+    const res = await fetch('https://zboxiyrinucvjwuicsso.supabase.co/functions/v1/smooth-task', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -1664,6 +1663,19 @@ async function callAI(prompt, el, cb) {
         prompt: prompt
       })
     });
+
+    if (!res.ok) throw new Error('Communication Error');
+
+    const data = await res.json();
+    const aiText = data.candidates[0].content.parts[0].text;
+
+    if (cb) cb(aiText);
+
+  } catch (e) {
+    console.error(e);
+    el.innerHTML = '<div style="color:#ff6b6b;padding:10px;">Error: ' + e.message + '</div>';
+  }
+} // ← この閉じカッコが非常に重要です！
 
     if (!res.ok) throw new Error('Network response was not ok');
 
